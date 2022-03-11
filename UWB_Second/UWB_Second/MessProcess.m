@@ -3,8 +3,7 @@
 
 
 global_Name;     %定位数据包
-anchorRxtime = zeros(256,4);     %基站收到标签的定位数据包的时间
-haveNullOrDataCount = 0;        %调试debug用参数，调试用到的参数结束
+global_TimeUtil;
 
 for count = 1:size(dataCell,1)
     seqNum = str2double(dataCell{count,1}{1,2});        %序列号
@@ -37,6 +36,7 @@ for count = 1:size(dataCell,1)
             time2 = anchorRxtime(seqNum+1,2);
             time3 = anchorRxtime(seqNum+1,3);
             time4 = anchorRxtime(seqNum+1,4);
+            nature = [nature;time1,time2,time3,time4];
     
             bool = 1;
              if anchor12RxTime(anchor12SeqNum+1) == 0
@@ -69,7 +69,10 @@ for count = 1:size(dataCell,1)
             if bool == 1
                 [T1,T3,T4] = calculateSkewAndOffset(anchor12SeqNum,anchor13SeqNum,anchor14SeqNum,anchor31SeqNum,anchor32SeqNum,anchor12RxTime,anchor13RxTime,anchor14RxTime,anchor31RxTime,anchor32RxTime,dataPollingTimes,time1,time3,time4);
                 time = [T1;time2;T3;T4];
-            end                
+            end        
+
+            global time11;
+            time11 = [time11;time'];
             
             
             %cleanThisSeqData
@@ -79,7 +82,8 @@ for count = 1:size(dataCell,1)
             anchorRxtime(seqNum+1,4) = 0;
     
             %解算定位结果
-            [POS_X,POS_Y] = XYTDOA(time);
+            [POS_X,POS_Y] = XYTDOA(time,seqNum);
+            posiRes = [posiRes;POS_X,POS_Y];
             fprintf("chan定位结果，X: %.2f, Y: %.2f\n",POS_X,POS_Y);
     
 %             [xTaylor,yTaylor] = taylorCalculateXY(POS_X,POS_Y);

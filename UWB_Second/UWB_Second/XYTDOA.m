@@ -1,5 +1,5 @@
 
-function [Pos_X,Pos_Y] = XYTDOA(time)
+function [Pos_X,Pos_Y] = XYTDOA(time,seqNum)
     Q = eye(3);
     sGa = [1,0;0,1;1,1];
     Pos_X = 0;

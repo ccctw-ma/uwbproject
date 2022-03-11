@@ -15,6 +15,10 @@ global anchor32SeqNum;
 global anchor34SeqNum;
 global haveNullOrDataCount;
 global anchorRxTime;
+global rMinus;
+global posiRes;
+global time11;
+global nature;
 
 
 anchor12RxTime = zeros(256,1);
@@ -32,3 +36,7 @@ anchor34SeqNum = 0;
 
 haveNullOrDataCount = 0;
 anchorRxTime = zeros(256,4);
+rMinus = [];
+posiRes = [];
+time11 = [];
+nature = [];

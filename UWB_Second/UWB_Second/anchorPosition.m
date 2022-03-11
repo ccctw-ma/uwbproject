@@ -28,4 +28,5 @@ distance23 = sqrt(power(Anchor3PosX - Anchor2PosX,2) + power(Anchor3PosY - Ancho
 distance24 = sqrt(power(Anchor4PosX - Anchor2PosX,2) + power(Anchor4PosY - Anchor2PosY,2));
 distance34 = sqrt(power(Anchor4PosX - Anchor3PosX,2) + power(Anchor4PosY - Anchor3PosY,2));
 
+%信号传输速度
 C = 3 * 10^8;
