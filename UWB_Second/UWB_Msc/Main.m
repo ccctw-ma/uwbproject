@@ -64,13 +64,11 @@ for count = 1:size(dataCell,1)
     end
 end    
 
-
-
-
-
-
-
-
-
-
-
+% 删除定位结果里的全0行
+posiRes(all(posiRes == 0, 2), : ) = [];
+% 列的均值
+res_mean = mean(posiRes, 1);
+fprintf("定位结果均值 X: %f, Y: %f\n", res_mean(1), res_mean(2));
+% 列元素的标准差
+res_std = std(posiRes, 0 , 1);
+fprintf("定位结果标准差 X: %f, Y: %f\n", res_std(1), res_std(2));
