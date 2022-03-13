@@ -11,13 +11,8 @@ for count = 1:size(dataCell,1)
     receiveAnchor = dataCell{count,1}{1,4};             %接收
     rxTime = rxTimeTransform(dataCell{count,1}{1,5},dataCell{count,1}{1,6});        %接收时间
 
-% for count = 1:size(dataCell,1)
-%     seqNum = str2double(dataCell(count,2));        %序列号
-%     sendAnchorOrLabel = dataCell(count,3);         %发送的基站或标签
-%     receiveAnchor = dataCell(count,4);             %接收
-%     rxTime = rxTimeTransform(dataCell(count,5),dataCell(count,6));        %接收时间
 
-
+    % 是标签发送的信号
     if strcmp(sendAnchorOrLabel,Label)
         %基站接收到定位数据的本地时间
         if strcmp(receiveAnchor,Anchor1)
@@ -36,7 +31,7 @@ for count = 1:size(dataCell,1)
             time2 = anchorRxtime(seqNum+1,2);
             time3 = anchorRxtime(seqNum+1,3);
             time4 = anchorRxtime(seqNum+1,4);
-            nature = [nature;time1,time2,time3,time4];
+%             timeBefore = [timeBefore;time1,time2,time3,time4];
     
             bool = 1;
              if anchor12RxTime(anchor12SeqNum+1) == 0
@@ -69,10 +64,11 @@ for count = 1:size(dataCell,1)
             if bool == 1
                 [T1,T3,T4] = calculateSkewAndOffset(anchor12SeqNum,anchor13SeqNum,anchor14SeqNum,anchor31SeqNum,anchor32SeqNum,anchor12RxTime,anchor13RxTime,anchor14RxTime,anchor31RxTime,anchor32RxTime,dataPollingTimes,time1,time3,time4);
                 time = [T1;time2;T3;T4];
+                fprintf("同步后的时间 %f %f %f %f\n",time(1), time(2), time(3), time(4));
             end        
 
-            global time11;
-            time11 = [time11;time'];
+            global timeAfter;
+            timeAfter = [timeAfter;time'];
             
             
             %cleanThisSeqData
@@ -115,7 +111,7 @@ for count = 1:size(dataCell,1)
         end
         
     end
-        
+            
 end
 
 

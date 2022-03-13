@@ -33,7 +33,7 @@ function [Pos_X,Pos_Y] = XYTDOA(time,seqNum)
     R31 = abs((time(3)-time(1))*C);
     R41 = abs((time(4)-time(1))*C);
 
-    fprintf("%d: R2-R1=%d m,R3-R1=%d m,R4-R1=%d m\n",seqNum, R21,R31,R41);
+    fprintf("%d: R2-R1=%f m,R3-R1=%f m,R4-R1=%f m\n",seqNum, R21,R31,R41);
     global rMinus;
     rMinus = [rMinus;seqNum,R21,R31,R41];
     h = [0.5*(power(R21,2)-K2+K1);0.5*(power(R31,2)-K3+K1);0.5*(power(R41,2)-K4+K1)];

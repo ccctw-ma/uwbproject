@@ -17,16 +17,18 @@ global haveNullOrDataCount;
 global anchorRxTime;
 global rMinus;
 global posiRes;
-global time11;
-global nature;
+global timeAfter;
+global timeBefore;
 
 
+% 根据RBS算法 同步时间时需要的是 12 13 14 这三个时间
 anchor12RxTime = zeros(256,1);
 anchor13RxTime = zeros(256,1);
 anchor14RxTime = zeros(256,1);
 anchor12SeqNum = 0;
 anchor13SeqNum = 0;
 anchor14SeqNum = 0;
+
 anchor31RxTime = zeros(256,1);
 anchor32RxTime = zeros(256,1);
 anchor34RxTime = zeros(256,1);
@@ -38,5 +40,5 @@ haveNullOrDataCount = 0;
 anchorRxTime = zeros(256,4);
 rMinus = [];
 posiRes = [];
-time11 = [];
-nature = [];
+timeAfter = [];
+timeBefore = [];
