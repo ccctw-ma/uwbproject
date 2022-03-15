@@ -30,3 +30,6 @@ x = [1,2,3,4,5]
 y = [4,5,6,7,9]
 p = polyfit(x,y,1)
 length(find(x(2:4)~=0))
+for i = 0 : 4
+    i
+end

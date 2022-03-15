@@ -47,6 +47,15 @@ tempB23 = 0;
 tempK24 = 1;
 tempB24 = 0;
 
+% 拟合基站接受标签信号使用
+global labelToAnchorTimeFittingMatrix;
+global fittingParamsMatrix;
+global hasFitted;
+
+labelToAnchorTimeFittingMatrix = zeros(4, window, 2);
+fittingParamsMatrix = [1, 0; 1, 0; 1, 0; 1, 0];
+hasFitted = 0;
+
 global rMinus;
 global posiRes;
 global timeAfter;

@@ -1,6 +1,6 @@
 
 % 基于RBS(参考广播同步算法)对基站的时间进行线性拟合，在窗口值为window的条件下进行数据进行处理得到时钟的线性关系
-function [tempK23, tempB23, tempK24, tempB24] = timeFitting(anchorInteractionSeqMatrix, anchorInteractionTimeMatrix, window, tempK23, tempK24, tempB23, tempB24)
+function [tempK23, tempB23, tempK24, tempB24] = anchorTimeFitting(anchorInteractionSeqMatrix, anchorInteractionTimeMatrix, window, tempK23, tempK24, tempB23, tempB24)
     persistent lastIndex;
     persistent seqCount;
     if isempty(lastIndex)
