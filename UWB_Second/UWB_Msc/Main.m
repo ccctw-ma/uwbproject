@@ -61,7 +61,7 @@ for count = 1:size(dataCell,1)
             % 记录同步前且未进行拟合的时间数据
             timeBefore = [timeBefore;time'];
             % 对时间进行同步
-            [t1, t2, t3, t4] = synchroniseTimeByRBS(time1, time2 ,time3, time4, tempB23, tempB24, tempK23, tempK24);
+            [t1, t2, t3, t4] = synchroniseTimeByRBS(time1, time2 ,time3, time4, tempK12, tempB12, tempK23, tempB23, tempB24, tempK24);
             time = [t1; t2; t3; t4];
             
             % 记录同步后的时间
@@ -94,7 +94,8 @@ for count = 1:size(dataCell,1)
     elseif isKey(AnchorMap, sendAnchorOrLabel)  && isKey(AnchorMap ,receiveAnchor)
         anchorInteractionTimeMatrix(AnchorMap(sendAnchorOrLabel), AnchorMap(receiveAnchor), seqNum + 1) = rxTime;
         anchorInteractionSeqMatrix(AnchorMap(sendAnchorOrLabel), AnchorMap(receiveAnchor)) = seqNum + 1;
-        [tempK23, tempB23, tempK24, tempB24] = anchorTimeFitting(anchorInteractionSeqMatrix, anchorInteractionTimeMatrix, window, tempK23, tempK24, tempB23, tempB24);
+        [tempK23, tempB23, tempK24, tempB24] = anchorTimeFittingBaseBy2(anchorInteractionSeqMatrix, anchorInteractionTimeMatrix, window, tempK23, tempK24, tempB23, tempB24);
+        [tempK12, tempB12] = anchorTimeFittingBaseBy3(anchorInteractionSeqMatrix, anchorInteractionTimeMatrix, window, tempK12, tempB12);
     else
         fprintf("未知基站名%s, %s\n",sendAnchorOrLabel, receiveAnchor);  
     end

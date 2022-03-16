@@ -47,6 +47,17 @@ tempB23 = 0;
 tempK24 = 1;
 tempB24 = 0;
 
+
+global tempY12Matrix;
+global tempX2MatrixBase3;
+global tempK12;
+global tempB12;
+
+tempY12Matrix = zeros(window, 1);
+tempX2MatrixBase3 = zeros(window, 1);
+tempK12 = 1;
+tempB12 = 0;
+
 % 拟合基站接受标签信号使用
 global labelToAnchorTimeFittingMatrix;
 global fittingParamsMatrix;
