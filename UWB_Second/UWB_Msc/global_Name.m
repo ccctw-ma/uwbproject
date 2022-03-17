@@ -47,6 +47,26 @@ tempB23 = 0;
 tempK24 = 1;
 tempB24 = 0;
 
+
+global tempY12Matrix;
+global tempX2MatrixBase3;
+global tempK21;
+global tempB21;
+
+tempY12Matrix = zeros(window, 1);
+tempX2MatrixBase3 = zeros(window, 1);
+tempK21 = 1;
+tempB21 = 0;
+
+global seqCount2;
+global seqCount3;
+global lastIndex2;
+global lastIndex3;
+seqCount2 = 1;
+seqCount3 = 1;
+lastIndex2 = 0;
+lastIndex3 = 0;
+
 % 拟合基站接受标签信号使用
 global labelToAnchorTimeFittingMatrix;
 global fittingParamsMatrix;
