@@ -1,18 +1,24 @@
-% %52
-% Anchor1PosX = 0.35;
-% Anchor1PosY = 0.15;
+% anchor name
+Anchor1 = 'F5024552';
+Anchor2 = 'F5226439';     
+Anchor3 = 'F5024549';
+Anchor4 = 'F5226354';
+Anchors = [Anchor1,Anchor2,Anchor3,Anchor4];
 
-% %51
-% Anchor2PosX = 6.65;
-% Anchor2PosY = 0.15;
+% AnchorName Index map
+AnchorMap = containers.Map({'F5024552','F5226439','F5024549','F5226354'} , {1,2,3,4});
 
-% %49
-% Anchor3PosX = 6.65;
-% Anchor3PosY = 4.85;
+Label = '05C78E1B';
 
-% %54
-% Anchor4PosX = 0.35;
-% Anchor4PosY = 4.85;
+dataPollingTimes = 256;
+
+% 基站时间拟合的窗口值 这个需要根据实际情况进行动态变化
+windowSize = 8;
+
+% 基站数量
+anchorNum = 4;
+
+labelReceiveWindow = 4;
 
 %52
 Anchor1PosX = 0;
@@ -48,13 +54,9 @@ distance34 = sqrt(power(Anchor4PosX - Anchor3PosX,2) + power(Anchor4PosY - Ancho
 C = 299792458;
 
 % labelX = 4.75;
+labelX = 4.3;
 % labelY = 2.0;
-labelX = 4.4;
 labelY = 1.85;
-% labelX = 3.15;
-% labelY = 2.35;
-% labelX = 4.75;
-% labelY = 2;
 labelZ = 1.20;
 anchorZ = 2.7;
 
@@ -72,4 +74,5 @@ BS = [
        Anchor1PosX, Anchor2PosX, Anchor3PosX, Anchor4PosX; 
        Anchor1PosY, Anchor2PosY, Anchor3PosY, Anchor4PosY;
        2.7, 2.7, 2.7, 2.7
+      % 0, 0, 0, 0
      ];

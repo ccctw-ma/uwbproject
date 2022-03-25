@@ -20,6 +20,9 @@ anchorInteractionTimeMatrix = zeros(4,4,256);
 % 基站之间交互的序号矩阵
 anchorInteractionSeqMatrix = zeros(4,4,1) + 1;
 
+% 基站之间进行拟合的参数矩阵
+anchorFittingParamsMatrix = zeros(4, 4, 2);
+
 % 基站时间拟合的窗口值 这个需要根据实际情况进行动态变化
 window = 8;
 
@@ -85,3 +88,6 @@ rMinus = [];
 posiRes = [];
 timeAfter = [];
 timeBefore = [];
+
+global distance_label_anchor1;
+distance_label_anchor1 = [];
