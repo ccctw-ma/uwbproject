@@ -7,6 +7,8 @@ anchorPosition;  %基站位置 以及一些常量信息
 
 % 记录异常的定位结果
 abnormalRes = [];
+% 记录正常的定位结果所使用的时钟
+normalRes = [];
 timeBefore1 = [];
 timeBefore2 = [];
 timeBefore3 = [];
@@ -16,10 +18,15 @@ seqNumbers = [];
 % labelToAnchorTimeMatrix = zeros(4, 256);
 % labelToAnchorSeqMatrix = zeros(4, 1) + 1;
 
-labelReceiveWindow = 4;
-dR = [];
+labelReceiveWindow = 16;
+diffR = [];
+diffKalmanR = [];
+kalmanPosiRes = [];
+abnormalKalmanRes = [];
 
-for count = 1:size(dataCell,1)
+
+
+for count = 1 : size(dataCell, 1)
     seqNum = str2double(dataCell{count,1}{1,2});        %序列号
     sendAnchorOrLabel = dataCell{count,1}{1,3};         %发送的基站或标签
     receiveAnchor = dataCell{count,1}{1,4};             %接收者的标签
@@ -38,35 +45,38 @@ for count = 1:size(dataCell,1)
         fittedTime = rxTime;
         % fittedTimeCollections = [fittedTimeCollections;rxTime, fittedTime];
         if strcmp(receiveAnchor,Anchor1)
-            anchorRxtime(seqNum+1, 1) = fittedTime;
-            timeBefore1 = [timeBefore1;seqNum + 1, fittedTime];
+            anchorRxtime(seqNumber, 1) = fittedTime;
+            timeBefore1 = [timeBefore1;seqNumber, fittedTime];
         elseif strcmp(receiveAnchor,Anchor2)
-            anchorRxtime(seqNum+1, 2) = fittedTime;
-            timeBefore2 = [timeBefore2;seqNum + 1, fittedTime];
+            anchorRxtime(seqNumber, 2) = fittedTime;
+            timeBefore2 = [timeBefore2;seqNumber, fittedTime];
         elseif strcmp(receiveAnchor,Anchor3)
-            anchorRxtime(seqNum+1, 3) = fittedTime;
-            timeBefore3 = [timeBefore3;seqNum + 1, fittedTime];
+            anchorRxtime(seqNumber, 3) = fittedTime;
+            timeBefore3 = [timeBefore3;seqNumber, fittedTime];
         elseif strcmp(receiveAnchor,Anchor4)
-            anchorRxtime(seqNum+1, 4) = fittedTime;
-            timeBefore4 = [timeBefore4;seqNum + 1, fittedTime];
+            anchorRxtime(seqNumber, 4) = fittedTime;
+            timeBefore4 = [timeBefore4;seqNumber, fittedTime];
         end
 
 
         if length(find(anchorRxtime(seqNum + 1, : ) ~= 0 )) == 4
-            time1 = anchorRxtime(seqNum+1,1);
-            time2 = anchorRxtime(seqNum+1,2);
-            time3 = anchorRxtime(seqNum+1,3);
-            time4 = anchorRxtime(seqNum+1,4);
-            time = [time1; time2; time3; time4];
+            if sum(clockSynchronized) ~= 3
+                fprintf("基站时钟尚未同步\n");
+                continue;
+            end
+            time1 = anchorRxtime(seqNumber, 1);
+            time2 = anchorRxtime(seqNumber, 2);
+            time3 = anchorRxtime(seqNumber, 3);
+            time4 = anchorRxtime(seqNumber, 4);
+            time = [seqNumber, time1, time2, time3, time4];
             % 记录同步前且未进行拟合的时间数据
-            timeBefore = [timeBefore;time'];
+            timeBefore = [timeBefore;time];
             % 对时间进行同步
             [t1, t2, t3, t4] = synchroniseTimeByRBS(time1, time2 ,time3, time4, tempK21, tempB21, tempK23, tempB23, tempK24, tempB24);
             % [t1, t2, t3, t4] = synchroniseTimeByRBS(time1, time2 ,time3, time4);
-            time = [t1; t2; t3; t4];
-            
+            time = [t1, t2, t3, t4];
             % 记录同步后的时间
-            timeAfter = [timeAfter;time'];
+            timeAfter = [timeAfter;time];
             %cleanThisSeqData
             for index = 0:labelReceiveWindow
                 cleanIndex = seqNumber - index;
@@ -75,31 +85,45 @@ for count = 1:size(dataCell,1)
                 end
                 anchorRxtime(cleanIndex, : ) = 0;
             end
-            
-            % [xTaylor,yTaylor] = taylorCalculateXY(POS_X,POS_Y);
-            %解算定位结果
-           
+              
             R = [(t2 - t1) * C, (t3 - t1) * C, (t4 - t1) * C];
             % R = [R21, R31, R41];
-            dR = [dR; R];
-            % [POS_X,POS_Y] = XYTDOA(time,seqNum);
-            % [POS_X,POS_Y] = chanNumOfAnchorLarge(R);
-            % [POS_X,POS_Y] = chanNumOfAnchor3(R);
+            diffR = [diffR; R];
+
+            kalmanR = arrivalTimeKalmanFilter(R);
+            % kalmanR = arrivalTimeKalmanFilter(R, time);
+            diffKalmanR = [diffKalmanR; kalmanR];
+
+
             [POS_X,POS_Y] = chan_base_3(R);
-            % X = myChan2(BSN, BS, R)
-            % X = myChan2_test(BSN, BS, R);
-            % X = myChan3(BSN, BS, R, dR)
-            % X = myChan3_test(BSN, BS, R, dR)
-            % POS_X = X(1);
-            % POS_Y = X(2);
-            % POS_Z = X(3);
+            [POS_X_K, POS_Y_K] = chan_base_3(kalmanR);
+
             
-            % resPlot(R, POS_X, POS_Y);
-            if POS_X > 0 && POS_X < 10 && POS_Y > 0 && POS_Y < 10 
+            %resPlot(R, POS_X, POS_Y);
+            if POS_X_K > -1 && POS_X_K < 10 && POS_Y_K > -1 && POS_Y_K < 10 
+                kalmanPosiRes = [kalmanPosiRes;POS_X_K, POS_Y_K];
+                
+            else
+                abnormalKalmanRes = [abnormalKalmanRes;POS_X_K, POS_Y_K, kalmanR];
+            end
+            if POS_X > -1 && POS_X < 10 && POS_Y > -1 && POS_Y < 10 
                 posiRes = [posiRes;POS_X, POS_Y];
+                normalRes = [normalRes;seqNumber, t1, t2, t3, t4];
+                % if preTime == -1
+                %     dt = 0.5;               
+                % else
+                %     dt = abs(t2 - preTime);
+                % end
+                % dts = [dts; dt];
+                % preTime = t2;
+                % [X, K, P] = XYPositionKalmanFilter(dt, X, [POS_X; POS_Y], P);    
+                % Xs = [Xs;X'];
+                % Ks = [Ks;K];
+                % Ps = [Ps;P];
                 fprintf("chan定位结果, X: %.2f, Y: %.2f\n",POS_X,POS_Y);
             else
-                abnormalRes = [abnormalRes;time1, time2, time3, time4];
+                abnormalRes = [abnormalRes;seqNumber, t1, t2, t3, t4];
+                % abnormalRes = [abnormalRes; seqNumber, time1, time2, time3, time4];
             end
 
         end

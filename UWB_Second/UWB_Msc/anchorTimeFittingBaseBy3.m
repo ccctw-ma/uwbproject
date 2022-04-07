@@ -4,7 +4,8 @@ function [tempK21, tempB21] = anchorTimeFittingBaseBy3(anchorInteractionSeqMatri
     global seqCount3;
     global lastIndex3;
     global tempY12Matrix;
-    global tempX2MatrixBase3; 
+    global tempX2MatrixBase3;
+    global clockSynchronized; 
     seq31 = anchorInteractionSeqMatrix(3,1);
     seq32 = anchorInteractionSeqMatrix(3,2);
     
@@ -27,6 +28,7 @@ function [tempK21, tempB21] = anchorTimeFittingBaseBy3(anchorInteractionSeqMatri
                 tempB21 = res12(2);
                 % fprintf("timeFitting %f %f \n",tempK21, tempB21);
                 seqCount3 = 1;
+                clockSynchronized(1) = 1;
             end
             lastIndex3 = seq31;
         end
