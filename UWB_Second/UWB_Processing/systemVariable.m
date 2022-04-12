@@ -32,8 +32,29 @@ tempFittingMatrixSize = zeros(1, anchorNum) + 1;
 
 
 
+global R_X;
+global R_P;
+global vars_set_R;
+global sum_set_R;
+global testDataArr;
+global var_set_size;
+global sum_set_size;
+
+R_X = zeros(3, 1);
+R_P = zeros(3, 1) * 100;
+var_set_size = 6;
+sum_set_size = 6;
+vars_set_R = zeros(3, var_set_size);
+sum_set_R = zeros(3, sum_set_size);
+
+
+global testDataArr;
+testDataArr = [];
+
+
 global rMinus;
 global posiRes;
+global kalmanPosiRes;
 global timeBefore;
 global timeAfter;
 global dR;
@@ -47,6 +68,7 @@ global InfoNumComesFromLabel;
 
 rMinus = [];
 posiRes = [];
+kalmanPosiRes = [];
 timeAfter = [];
 timeBefore = [];
 dR = [];

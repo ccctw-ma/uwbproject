@@ -28,12 +28,15 @@ function [X, Y] = chan_base_3(R)
             else
                 res1 = (-b + sqrt(delta)) / (2 * a);
                 res2 = (-b - sqrt(delta)) / (2 * a);
-                if res1 >= 0 
+                if res1 >= 0 && res1 <=  maxDistance
                     x = (p1 + q1 * res1) ;
                     y = (p2 + q2 * res1) ;
-                else
+                elseif res2 >= 0 && res2 <=  maxDistance
                     x = (p1 + q1 * res2) ;
                     y = (p2 + q2 * res2) ;
+                else
+                    x = 0;
+                    y = 0;
                 end
             end
             res = [res; x, y];

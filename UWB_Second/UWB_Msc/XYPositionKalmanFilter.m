@@ -1,4 +1,4 @@
-function [X, K, P] = XYPositionKalmanFilter(dt, X_n_n, Z_n, P_n_n)
+function [X, K, P] = XYPositionKalmanFilter(dt, X_n_n, Z_n, P_n_n, Z_set)
 
     % F = [
     %     1, dt, 0.5*dt^2, 0, 0,    0;
@@ -18,7 +18,15 @@ function [X, K, P] = XYPositionKalmanFilter(dt, X_n_n, Z_n, P_n_n)
     F(4, 6) = 0.5 * dt ^ 2;
     F(5, 6) = dt;
     % R is the measurement covariance matrix 
-    R_n = eye(2) * 5;
+    Z_size = length(Z_set);
+    
+
+    if Z_size <= 10
+        z_var = var(Z_set, 1, 1);
+    else
+        z_var = var(Z_set(length(Z_set) - 10: end, : ), 1, 1);
+    end
+    R_n = [z_var(1), 0; 0, z_var(2)];
     % Q is the process noise matrix
     Q = [
         (dt ^ 4) / 2, (dt ^ 3) / 2, (dt ^ 2) / 2, 0, 0 ,0;
@@ -27,7 +35,7 @@ function [X, K, P] = XYPositionKalmanFilter(dt, X_n_n, Z_n, P_n_n)
         0, 0, 0, (dt ^ 4) / 2, (dt ^ 3) / 2, (dt ^ 2) / 2;
         0, 0 ,0, (dt ^ 3) / 2, dt ^ 2, dt;
         0, 0 ,0, (dt ^ 2) / 2, dt, 1;
-    ] * 0.25;
+    ] * 0.001;
     % H is the observation matrix Z_n = H * X_n + V_n   the Xn is the measurement state 
  
 

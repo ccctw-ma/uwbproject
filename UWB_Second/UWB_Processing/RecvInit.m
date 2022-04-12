@@ -10,6 +10,9 @@ udpReceiver = dsp.UDPReceiver('LocalIPPort',udpPort, 'MaximumMessageLength', 102
 dataCell = [];
 
 tic;
+figure();
+hold on;
+axis([-1, 7, -1 , 5]);
 while true   
     dataReceived = udpReceiver();  %dataReceived就是原始报文
     if ~isempty(dataReceived) %数据不空 开始处理
@@ -50,3 +53,14 @@ hold on;
 axis equal;
 scatter(posiRes(:,1),posiRes(:,2));
 scatter(labelX, labelY);
+
+%%
+figure();
+plot(testDataArr(:, 1: 4));
+legend('Measured', 'Estimate', 'Eean', 'KalmanGain');
+figure();
+plot(testDataArr(:, 5: 8));
+legend('Measured', 'Estimate', 'Eean', 'KalmanGain');
+figure();
+plot(testDataArr(:, 9: 12));
+legend('Measured', 'Estimate', 'Eean', 'KalmanGain');

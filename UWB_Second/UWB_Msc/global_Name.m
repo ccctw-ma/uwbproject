@@ -71,10 +71,6 @@ lastIndex2 = 0;
 lastIndex3 = 0;
 
 
-% 时钟是否同步
-global clockSynchronized;
-clockSynchronized = zeros(3, 1);
-
 % 拟合基站接受标签信号使用
 global labelToAnchorTimeFittingMatrix;
 global fittingParamsMatrix;
@@ -96,8 +92,8 @@ timeBefore = [];
 
 
 % 使用卡尔曼滤波处理时钟差
-global R_X;
-global R_P;
+global R_X_n_n;
+global R_P_n_n;
 % 求观测噪声使用的观测数据集合
 global vars_set_R;
 global var_set_size;
@@ -106,13 +102,20 @@ global sum_set_R;
 global sum_set_size;
 
 
-R_X = zeros(3, 1);
-R_P = zeros(3, 1) * 100;
-var_set_size = 6;
-sum_set_size = 10;
-vars_set_R = zeros(3, var_set_size)
-sum_set_R = zeros(3, sum_set_size);
+% R_X = zeros(3, 1);
+% R_P = zeros(3, 1) * 100;
+% var_set_size = 3;
+% sum_set_size = 10;
+% vars_set_R = zeros(3, var_set_size);
+% sum_set_R = zeros(3, sum_set_size);
 
+
+R_X_n_n = zeros(2, 3);
+R_P_n_n = ones(2, 2, 3) * 100;
+var_set_size = 5;
+sum_set_size = 10;
+vars_set_R = zeros(3, var_set_size);
+sum_set_R = zeros(3, sum_set_size);
 
 global testDataArr;
 testDataArr = [];

@@ -19,13 +19,15 @@ for i = 1 : size(abnormalRes)
     tds = [tds; td_21, td_31, td_41];
 end
 %%
-plot(diff(normalRes(:, 2 : end), 1, 2))
-%%
 
-diffR(abs(diffR) > 5) = 0;
-plot(diffR);
+
+figure;
+plot(Xs);
+legend('Measured', 'Estimate', 'KalmanRes','meanRes', 'KalmanGain');
+
 
 %%
+% 基于卡尔曼滤波对达到距离差进行处理
 % 通过点随时间变化绘制运动轨迹的散点图
 % figure();
 % hold on;
@@ -34,5 +36,25 @@ plot(diffR);
 % colors = linspace(1, 256, length(posiRes));
 % scatter3(posiRes(:,1),posiRes(:,2), 1 : length(posiRes),[], colors, 'filled');
 colors = linspace(1, 256, length(kalmanPosiRes));
-scatter(kalmanPosiRes(:,1),kalmanPosiRes(:,2), [], colors, 'filled');
-% scatter3(kalmanPosiRes(:,1),kalmanPosiRes(:,2), 1:length(kalmanPosiRes), [], colors, 'filled');
+% scatter(kalmanPosiRes(:,1),kalmanPosiRes(:,2), [], colors, 'filled');
+scatter3(kalmanPosiRes(:,1),kalmanPosiRes(:,2), 1:length(kalmanPosiRes), [], colors, 'filled');
+
+%%
+% 附带xy轴加速度的轨迹预测对比
+figure();
+hold on;
+scatter(kalmanPosiRes(:, 1), kalmanPosiRes(:, 2), 'r');
+scatter(Xs(:, 1), Xs(:, 4), 'blue');
+
+%%
+figure();
+plot(testDataArr(:, 1: 5));
+legend('Measured', 'Estimate', 'KalmanRes','meanRes', 'KalmanGain');
+%% 
+figure();
+plot(testDataArr(:, 6: 10));
+legend('Measured', 'Estimate', 'KalmanRes','meanRes', 'KalmanGain');
+%%
+figure();
+plot(testDataArr(:, 10: 15));
+legend('Measured', 'Estimate', 'KalmanRes','meanRes', 'KalmanGain');

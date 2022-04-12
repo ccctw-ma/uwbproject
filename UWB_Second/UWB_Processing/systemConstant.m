@@ -19,7 +19,7 @@ windowSize = 4;
 anchorNum = 4;
 
 % 接受标签后信号存活的窗口期
-labelReceiveWindow = 32;
+labelReceiveWindow = 64;
 
 %52
 Anchor1PosX = 0;
@@ -50,7 +50,7 @@ distance41 = sqrt(power(Anchor4PosX - Anchor1PosX,2) + power(Anchor4PosY - Ancho
 distance23 = sqrt(power(Anchor3PosX - Anchor2PosX,2) + power(Anchor3PosY - Anchor2PosY,2));
 distance24 = sqrt(power(Anchor4PosX - Anchor2PosX,2) + power(Anchor4PosY - Anchor2PosY,2));
 distance34 = sqrt(power(Anchor4PosX - Anchor3PosX,2) + power(Anchor4PosY - Anchor3PosY,2));
-
+maxDistance = max([distance21, distance31, distance41, distance23, distance24, distance34]);
 %信号传输速度
 C = 299792458;
 
