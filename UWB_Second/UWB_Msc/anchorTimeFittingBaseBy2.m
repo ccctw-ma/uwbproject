@@ -1,6 +1,6 @@
 
 % 基于RBS(参考广播同步算法)对基站的时间进行线性拟合，在窗口值为window的条件下进行数据进行处理得到时钟的线性关系
-function [tempK23, tempB23, tempK24, tempB24] = anchorTimeFittingBaseBy2(anchorInteractionSeqMatrix, anchorInteractionTimeMatrix, window, tempK23, tempK24, tempB23, tempB24)
+function [tempK23, tempB23, tempK24, tempB24] = anchorTimeFittingBaseBy2(anchorInteractionSeqMatrix, anchorInteractionTimeMatrix, windowSize, tempK23, tempK24, tempB23, tempB24)
  
     global tempY23Matrix;
     global tempY24Matrix;
@@ -23,7 +23,7 @@ function [tempK23, tempB23, tempK24, tempB24] = anchorTimeFittingBaseBy2(anchorI
             tempX2Matrix(seqCount2) = anchorInteractionTimeMatrix(1,2,seq12);
             seqCount2 = seqCount2 + 1;
             % 收集够满足窗口大小的数据 开始使用最小二乘法的线性拟合
-            if seqCount2 == window + 1
+            if seqCount2 == windowSize + 1
                 % plot(tempX2Matrix(:,1), tempY23Matrix(:))
                 % plot(tempX2Matrix(:,1), tempY24Matrix(:))               
                 % res23 = inv(tempX2Matrix.' * tempX2Matrix) * tempX2Matrix.' * tempY23Matrix;

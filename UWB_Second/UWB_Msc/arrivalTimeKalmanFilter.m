@@ -70,7 +70,7 @@ function [kalmanR, meanR] = arrivalTimeKalmanFilter(R, dt)
 
     F = [1, dt; 0, 1];
     % 预测噪声
-    Q = eye(2) * 0.01;
+    Q = eye(2) * 0.02;
     % 观测数据转移方程
     H = [1, 0];
     
@@ -78,7 +78,10 @@ function [kalmanR, meanR] = arrivalTimeKalmanFilter(R, dt)
     R_X_n1_n = F * R_X_n_n;
     for i = 1 : 3
         R_P_n1_n(:, :, i) = F * R_P_n_n(:, :, i) * F' + Q;
-        if abs(R(i)) > 8
+
+        % || abs(R(i) - R_X_n1_n(1, i)) > 3
+        if abs(R(i)) > 6
+            R(i)
             R(i) = R_X_n1_n(1, i);
         end
         for j = 1 : var_set_size - 1
@@ -92,7 +95,11 @@ function [kalmanR, meanR] = arrivalTimeKalmanFilter(R, dt)
 
         R_X_n1_n1(:, i) = R_X_n1_n(:, i) + K(:, i) * (R(i) - H * R_X_n1_n(:, i));
         R_P_n1_n1(:, :, i) = R_P_n1_n(:, :, i) - K(:, i) * H * R_P_n1_n(:, :, i);
+
         
+        if sum(sum_set_R(i, :)) == sum_set_size
+            sum_set_R(i, :) = sum_set_R(i, :) * R_X_n1_n1(1, i);
+        end
         for j = 1 : sum_set_size - 1
             sum_set_R(i, j) = sum_set_R(i, j + 1);
         end

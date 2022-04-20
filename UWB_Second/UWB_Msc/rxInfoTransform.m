@@ -1,5 +1,5 @@
 
-function [stdNoise, firstPathAmp1, firstPathAmp2, firstPathAmp3, maxGrowthCIR, rxPreamCount] = rxInfoTransform(data)
+function [stdNoise, firstPathAmp1, firstPathAmp2, firstPathAmp3, maxGrowthCIR, rxPreamCount] = rxInfoTransform(ori, data)
     infos = strsplit(data, '-');
     stdNoise = hex2dec(char(infos(1)));
     firstPathAmp1 = hex2dec(char(infos(2)));

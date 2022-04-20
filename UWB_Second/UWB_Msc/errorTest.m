@@ -58,3 +58,14 @@ legend('Measured', 'Estimate', 'KalmanRes','meanRes', 'KalmanGain');
 figure();
 plot(testDataArr(:, 10: 15));
 legend('Measured', 'Estimate', 'KalmanRes','meanRes', 'KalmanGain');
+
+%%
+figure();
+
+
+%%
+% 检验基站之间交互时间矫正的效果
+plot(anchorInteractionInfos{1, 2}(:, 1:2));
+hold on;
+plot(anchorInteractionInfosAfterCorrect{1, 2});
+hold off;

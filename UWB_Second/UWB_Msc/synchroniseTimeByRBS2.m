@@ -1,5 +1,6 @@
-function [t1, t2, t3, t4] = synchroniseTimeByRBS2(anchorFittingParamsMatrix, time1, time2 ,time3, time4)
+function [t1, t2, t3, t4] = synchroniseTimeByRBS2(time1, time2 ,time3, time4)
     systemConstant;
+    global anchorFittingParamsMatrix;
     % fprintf("同步前的时间 %f %f %f %f\n",time1, time2, time3, time4);
     % t1 = time1;
     % t2 = (time2 - anchorFittingParamsMatrix(1, 2, 2)) / anchorFittingParamsMatrix(1, 2, 1) - distance41 / C + distance24 / C; 

@@ -1,5 +1,8 @@
-
 %global_Name
+
+
+systemConstant;
+
 
 % anchor name
 Anchor1 = 'F5024552';
@@ -12,13 +15,15 @@ AnchorMap = containers.Map({'F5024552','F5226439','F5024549','F5226354'} , {1,2,
 
 Label = '05C78E1B';
 
+
+
 dataPollingTimes = 256;
 
 % 基站之间交互的时间矩阵
 anchorInteractionTimeMatrix = zeros(4,4,256);
 
 % 基站之间交互的序号矩阵
-anchorInteractionSeqMatrix = zeros(4,4,1) + 1;
+anchorInteractionSeqMatrix = zeros(4, 4);
 
 % 基站之间进行拟合的参数矩阵
 anchorFittingParamsMatrix = zeros(4, 4, 2);
@@ -71,14 +76,7 @@ lastIndex2 = 0;
 lastIndex3 = 0;
 
 
-% 拟合基站接受标签信号使用
-global labelToAnchorTimeFittingMatrix;
-global fittingParamsMatrix;
-global hasFitted;
 
-labelToAnchorTimeFittingMatrix = zeros(4, window, 2);
-fittingParamsMatrix = [1, 0; 1, 0; 1, 0; 1, 0];
-hasFitted = 0;
 
 global rMinus;
 global posiRes;
@@ -87,8 +85,12 @@ global timeBefore;
 
 rMinus = [];
 posiRes = [];
-timeAfter = [];
+% 同步前的数据
 timeBefore = [];
+% 同步后的数据
+timeAfter = [];
+% 过滤没能正确同步的数据
+timeAfterFilter = [];
 
 
 % 使用卡尔曼滤波处理时钟差
@@ -115,7 +117,7 @@ R_P_n_n = ones(2, 2, 3) * 100;
 var_set_size = 5;
 sum_set_size = 10;
 vars_set_R = zeros(3, var_set_size);
-sum_set_R = zeros(3, sum_set_size);
+sum_set_R = ones(3, sum_set_size);
 
 global testDataArr;
 testDataArr = [];

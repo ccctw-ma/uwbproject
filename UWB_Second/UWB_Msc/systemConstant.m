@@ -6,7 +6,7 @@ Anchor4 = 'F5226354';
 Anchors = [Anchor1,Anchor2,Anchor3,Anchor4];
 
 % AnchorName Index map
-AnchorMap = containers.Map({'F5024552','F5226439','F5024549','F5226354'} , {1,2,3,4});
+AnchorMap = containers.Map({'F5024552','F5226439','F5024549','F5226354'} , {1, 2, 3, 4});
 
 Label = '05C78E1B';
 
@@ -15,10 +15,32 @@ dataPollingTimes = 256;
 % 基站时间拟合的窗口值 这个需要根据实际情况进行动态变化
 windowSize = 8;
 
+% 实际观测的基站之间互相发送信号的时间间隔
+anchorSignalTransmissionInterval = 0.16;
+
 % 基站数量
 anchorNum = 4;
 
-labelReceiveWindow = 4;
+% 
+labelReceiveWindow = 16;
+
+
+
+% %52
+% Anchor1PosX = 0.35;
+% Anchor1PosY = 0.15;
+
+% %51
+% Anchor2PosX = 6.65;
+% Anchor2PosY = 0.15;
+
+% %49
+% Anchor3PosX = 6.65;
+% Anchor3PosY = 4.85;
+
+% %54
+% Anchor4PosX = 0.35;
+% Anchor4PosY = 4.85;
 
 %52
 Anchor1PosX = 0;
