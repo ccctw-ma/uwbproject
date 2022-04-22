@@ -60,14 +60,14 @@ while true
             continue;
         end
     
-        [pos_x_est, pos_y_est, pos_x_cor, pos_y_cor, k_x, k_y] = KF.Run(time_stamp, [pos_x; pos_y]);
-        mean_posi = KF.mean_Kf();
+        % [pos_x_est, pos_y_est, pos_x_cor, pos_y_cor, k_x, k_y] = KF.Run(time_stamp, [pos_x; pos_y]);
+        % mean_posi = KF.mean_Kf();
     
         posiRes = [posiRes; pos_x, pos_y];
-        kal_posiRes = [kal_posiRes; pos_x_cor, pos_y_cor];
-        mean_posiRes = [mean_posiRes; mean_posi(1), mean_posi(2)];
+        % kal_posiRes = [kal_posiRes; pos_x_cor, pos_y_cor];
+        % mean_posiRes = [mean_posiRes; mean_posi(1), mean_posi(2)];
+        % kalmanDataArr = [kalmanDataArr;pos_x, pos_x_est, pos_x_cor, mean_posi(1), k_x, pos_y, pos_y_est, pos_y_cor,  mean_posi(2), k_y];
     
-        kalmanDataArr = [kalmanDataArr;pos_x, pos_x_est, pos_x_cor, mean_posi(1), k_x, pos_y, pos_y_est, pos_y_cor,  mean_posi(2), k_y];
 
         % if count ~= tmep_mean_size +1
         %     tmep_mean(1, count) = mean_posi(1);
@@ -84,7 +84,9 @@ while true
         % end
         
 
-        mean_posi
+        % mean_posi
+        pos_x
+        pos_y
         toc;
         length(posiRes)
         % scatter(pos_x, pos_y, 'blue');

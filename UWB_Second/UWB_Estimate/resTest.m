@@ -3,9 +3,18 @@
 figure;
 scatter(posiRes(:, 1), posiRes(:, 2));
 hold on;
-scatter(kal_posiRes(:, 1), kal_posiRes(:, 2));
+% scatter(kal_posiRes(:, 1), kal_posiRes(:, 2));
 scatter(mean_posiRes(:, 1), mean_posiRes(:, 2));
+scatter(ftm_posiRes(:, 1), ftm_posiRes(:, 2));
+scatter(ftm_mean_posiRes(:, 1), ftm_mean_posiRes(:, 2));
 
+
+%%
+figure;
+
+scatter(posiRes(:, 1), posiRes(:, 2));
+hold on;
+scatter(ftm_posiRes(:, 1), ftm_posiRes(:, 2));
 
 %%
 figure;
