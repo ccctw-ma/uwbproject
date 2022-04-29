@@ -1,16 +1,16 @@
 clc; 
-close all; % clean window
+% close all; % clean window
 
 globalConstant;
 globalVariable;
 
-tic
-% posiRes = [];
+tic();
+posiRes = [];
+interval_posiRes = [];
 % mean_posiRes = [];
 % kal_posiRes = [];
 ftm_posiRes = [];
 ftm_mean_posiRes = [];
-kalmanDataArr = [];
 invalidDataNum = 0;
 
 % figure();
@@ -19,16 +19,13 @@ invalidDataNum = 0;
 
 cfg = testFtmPeConfig();
 KF = KfFtmclass(cfg); % Kalman Filter Constructor
-mean_set = zeros(2, 5);
-tic()
 
-Anchors = [
-    0.25, 3.75;
-    0.25, 0.5;
-    6.75, 0.5;
-    6.75, 4.75;
-    4,    5;
-];
+
+
+mean_set = zeros(2, 5);
+interval_size = 10; %采样间隔
+interval_set = zeros(2, interval_size); %采样数据集
+interval_set_index = 1;
 
 for index = 1 : length(dataCell)
 % for index = 1 : 1000
@@ -55,9 +52,21 @@ for index = 1 : length(dataCell)
         [posEst,updateDone,bias,latErrPredict,latErrUpdate,KFtime] = KF.Run(measRange, time_stamp, Rsp);
         mean_set(1, i) = posEst(1);
         mean_set(2, i) = posEst(2);
-         
+        % posEst(3) 
     end
 
+    
+    if interval_set_index == interval_size + 1
+        interval_set_index = 1;
+        mean_inteval_res = mean(interval_set, 2);
+        interval_posiRes = [interval_posiRes; mean_inteval_res(1), mean_inteval_res(2)];
+    else
+        interval_set(1, interval_set_index) = pos_x;
+        interval_set(2, interval_set_index) = pos_y;
+        interval_set_index = interval_set_index + 1;
+    end
+
+    posiRes = [posiRes; pos_x, pos_y];
     ftm_posi = mean(mean_set, 2);
     mean_ftm_posi = KF.mean_Kf(ftm_posi);
     ftm_posiRes = [ftm_posiRes; ftm_posi'];

@@ -54,11 +54,11 @@ while true
         % 收集数据
         dataCell = [dataCell; data_row];
 
-        if ~config.hasInit
-            KF.initKf(pos_x, pos_y, time_stamp);
-            config.hasInit = true;
-            continue;
-        end
+        % if ~config.hasInit
+        %     KF.initKf(pos_x, pos_y, time_stamp);
+        %     config.hasInit = true;
+        %     continue;
+        % end
     
         % [pos_x_est, pos_y_est, pos_x_cor, pos_y_cor, k_x, k_y] = KF.Run(time_stamp, [pos_x; pos_y]);
         % mean_posi = KF.mean_Kf();
@@ -85,15 +85,15 @@ while true
         
 
         % mean_posi
-        pos_x
-        pos_y
+        [pos_x pos_y]
+        
         toc;
         length(posiRes)
         % scatter(pos_x, pos_y, 'blue');
         % scatter(mean_posi(1), mean_posi(2), 'r');
         % pause(0.0000000001)
 
-
+% 
     end
 end
 

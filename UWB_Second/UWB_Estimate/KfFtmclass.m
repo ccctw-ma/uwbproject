@@ -31,8 +31,10 @@ classdef KfFtmclass < handle
         init
         type
 
+        %测试使用
         mean_set_size
         mean_set
+        InnovationSet
     end
     
     methods
@@ -59,8 +61,10 @@ classdef KfFtmclass < handle
             obj.type.MEAS_RANG    = cfg.MEAS_RANG;
             obj.type.MEAS_CONST_Z = cfg.MEAS_CONST_Z;
 
+            %测试使用
             obj.mean_set_size = 50;
             obj.mean_set = ones(2, obj.mean_set_size);
+            obj.InnovationSet = [];
         end
         
         % KF Prediction
@@ -70,16 +74,23 @@ classdef KfFtmclass < handle
         end
         
         % KF Update
-        function updateKF(obj,y,H,R,hi)
-            K = obj.P * H' / (H * obj.P * H' + R); % calculate K - filter gain
-            obj.X = obj.X + K*(y - hi);            % calculate X - Update states
-            obj.P    = obj.P   - K * H * obj.P;    % calculate P - Update states covariance
+        function updateKF(obj, y, H, R, hi)
+
+            % predict = obj.X
+
+            K = obj.P * H' / (H * obj.P * H' + R);      % calculate K - filter gain
+            % K
+            obj.X = obj.X + K * (y - hi);               % calculate X - Update states
+
+            % update = obj.X
+             
+            obj.P = obj.P   - K * H * obj.P;            % calculate P - Update states covariance
         end
         
         function obj = initKF(obj,initTs,initPos)
             obj.t = initTs;         % Init. EKF time
             
-            Xinit = [initPos;0];   % Initialize EKF client position states
+            Xinit = [initPos; 0];   % Initialize EKF client position states
             
             Pinit = diag([
                 obj.init.posLatStd
@@ -98,7 +109,6 @@ classdef KfFtmclass < handle
 
             obj.mean_set(1, :) = obj.mean_set(1, :) * initPos(1);
             obj.mean_set(2, :) = obj.mean_set(2, :) * initPos(2);
-
         end
         
         %-% Create state transition matrix
@@ -115,7 +125,8 @@ classdef KfFtmclass < handle
             switch type
                 case obj.type.MEAS_RANG % a branch used to update x and y 
                     H = (x_n_n(1:3)' -  wifiAPpos.pos') / norm (x_n_n(1:3)' -  wifiAPpos.pos'); %a unit direction vector.
-                    H = [H,1]; % adding bias
+                    % 通过观测值与状态集之间的关系求导，构建雅克比矩阵
+                    H = [H, 1]; % adding bias
                 case obj.type.MEAS_CONST_Z % or E.MEAS_POSZ) % a branch used to updated z
                     H = [0, 0, 1, 0];
                 otherwise
@@ -133,13 +144,14 @@ classdef KfFtmclass < handle
                     hi = nan;
             end
         end
+
         %%
-        function [R,gain] = CreateR(obj, range, expRange,H,inov,P)
+        function [R,gain] = CreateR(obj, range, expRange, H, inov, P)
             
             R = obj.rangeMeasNoiseVar;
             minSigma = sqrt(obj.rangeMeasNoiseVar);
             if obj.scaleSigmaForBigRange
-                R = ( max(minSigma,0.4*range-2) ) ^ 2;
+                R = (max(minSigma, 0.4 * range - 2)) ^ 2;
             end
 
             if obj.outlierFilterEnable  % modify R if the range is too far from current solution
@@ -147,8 +159,15 @@ classdef KfFtmclass < handle
                 latErrPredict = sqrt(sum(tmp(1:3)));
                 %filter also negative outliers
                 d = abs(range - expRange) - latErrPredict - minSigma;
-                if (d > 0) || (range > obj.OutlierRangeFilter)% outlier
-                    R = 20 ^ 2;
+              
+                if (d > 0) || (range > obj.OutlierRangeFilter)  % outlier
+
+                    toc
+                    range
+                    expRange
+                    latErrPredict
+                    minSigma
+                    R = 100;
                 end
             end
             inovCov = H*P*H' + R;
@@ -168,26 +187,30 @@ classdef KfFtmclass < handle
 
         % ----------------------------------------------
         function [posEst,updateDone,bias,latErrPredict,latErrUpdate,KFtime] = Run(obj,y,t,Rsp)
-            dt    = max(0,t - obj.t);  % time difference from last update
-            obj.t = (obj.t + dt);      % update current KF time
+            dt    = max(0, t - obj.t);                 % time difference from last update
+            obj.t = (obj.t + dt);                      % update current KF time
             KFtime = obj.t;
-            F = obj.CreateF();         % generate the states transition matrix, an eye matrix, doing nothing.
-            Q = obj.CreateQ(dt);       % generate the system noise covariance matrix
-            obj.predictKF(F,Q);        % Do KF prediction
-            tmp = svd(obj.P);  % the std of state
+            F = obj.CreateF();                         % generate the states transition matrix, an eye matrix, doing nothing.
+            Q = obj.CreateQ(dt);                       % generate the system noise covariance matrix
+            obj.predictKF(F,Q);                        % Do KF prediction
+            tmp = svd(obj.P);                          % the std of state
             latErrPredict = sqrt(sum(tmp(1:3))); % std sum in the prediction phase
             
             obj.Nstep = obj.Nstep + 1;
             H  = obj.CreateH(obj.type.MEAS_RANG, obj.X, Rsp);
             hi = obj.CreateHx(obj.type.MEAS_RANG, obj.X, Rsp); % calculate predicted range
             
+
+
             obj.Innovation = y - hi;
             obj.InnovationMean = (obj.InnovationMean + obj.Innovation)/obj.Nstep; % useless
             obj.InnovationStd = (obj.Innovation - obj.InnovationMean)/obj.Nstep; % useless
 
+            obj.InnovationSet = [obj.InnovationSet; obj.Innovation];
+
             [R,gain]  = obj.CreateR(y, hi,H,obj.Innovation,obj.P);
             if abs(gain) < obj.gainLimit
-                obj.updateKF(y,H,R,hi); % Do KF update
+                obj.updateKF(y, H, R, hi); % Do KF update
                 updateDone = 1;
             else
                 updateDone = 0;
@@ -195,7 +218,7 @@ classdef KfFtmclass < handle
             % up update x and y
             % below update z
             Hz  = obj.CreateH(obj.type.MEAS_CONST_Z, obj.X, Rsp);
-            obj.updateKF(obj.knownZ,  Hz,  obj.zMeasNoiseVar,  obj.X(3)); % Do KF update
+            obj.updateKF(obj.knownZ, Hz, obj.zMeasNoiseVar, obj.X(3)); % Do KF update
             
             posEst = obj.X(1:3); % updated current position estimation vector
             
@@ -207,7 +230,3 @@ classdef KfFtmclass < handle
 
     end % methods
 end % classdef
-
-
-
-

@@ -22,6 +22,7 @@ classdef Kfclass < handle
         Z  % 观测数据
 
         dts %相邻信号之间的距离差
+        abnormal_mea 
     end
     
     methods 
@@ -39,6 +40,7 @@ classdef Kfclass < handle
             obj.R = eye(2);
 
             obj.dts = [];
+            obj.abnormal_mea = [];
         end
 
         function obj = initKf(obj, pos_x, pos_y, time_stamp, index)
@@ -55,6 +57,7 @@ classdef Kfclass < handle
             obj.mean_set(2, :) = obj.mean_set(2, :) * init_mean(2);
             obj.time = time_stamp;
             obj.X_n1 = [init_mean(1), 0, 0, init_mean(2), 0, 0]';
+            obj.Z = [pos_x; pos_y];
         end
 
         function mean_res = mean_Kf(obj)
@@ -90,13 +93,9 @@ classdef Kfclass < handle
                 0,  0,     0,      0,  1,    dt;
                 0,  0,     0,      0,  0,    1; 
             ];
+            
+            
             % R is the measurement covariance matrix 
-
-            obj.update_var_set(Z);
-
- 
-            % z_var
-            % R_n = [z_var(1), 0; 0, z_var(2)];
 
             R_n = eye(2);
 
@@ -122,10 +121,24 @@ classdef Kfclass < handle
             X_n_n = obj.X_n1;
 
             P_n_n = obj.P;
-            Z_n = Z;
+            
 
             X_n1_n = F * X_n_n;
             P_n1_n = F * P_n_n * F' + Q;
+
+
+            measurement_innovation =  mean(diff(obj.var_set, 1, 2), 2);
+            cur_innovation = Z - obj.Z;
+            % obj.abnormal_mea = [obj.abnormal_mea; measurement_innovation(1),  cur_innovation(1)];
+            obj.update_var_set(Z);
+            % if sum(cur_innovation > 3 * measurement_innovation)
+            if abs(X_n1_n(1) - Z(1)) > 0.1 || abs(X_n1_n(4) - Z(2)) > 0.1
+                obj.abnormal_mea = [obj.abnormal_mea; Z'];
+                R_n = eye(2) * 50;
+            end
+
+
+            Z_n = Z;
 
             dk = 0.1;
             V_n = Z_n - H * X_n1_n;
