@@ -83,7 +83,7 @@ legend('Measured','estimateRes', 'kalmanRes','kalmanGain');
 %%
 figure;
 plot(kalmanDataArr(:, 5:8));
-title("Y");
+title("Y");\
 
 % legend('Measured','estimateRes', 'kalmanRes','meanRes','kalmanGain');
 legend('Measured','estimateRes', 'kalmanRes','kalmanGain');

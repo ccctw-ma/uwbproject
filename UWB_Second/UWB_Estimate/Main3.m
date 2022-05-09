@@ -11,12 +11,14 @@ invalidDataNum = 0;
 posiRes = [];
 mean_posiRes = [];
 kal_posiRes = [];
+kal_mean_posiRes = [];
 kalmanDataArr = [];
 
 config = initSystemConfig();
-KF = Kfclass2(config);
+KF = Kfclass3(config);
 
 for index = 1 : length(dataCell)
+% for index = 1 : 500
     data_row = dataCell(index, :);
 
     % 拿到实时的观测数据
@@ -43,7 +45,7 @@ for index = 1 : length(dataCell)
     posiRes = [posiRes; pos_x, pos_y];
     kal_posiRes = [kal_posiRes; kal_res.pos_x_cor, kal_res.pos_y_cor];
 
-    % mean_posiRes = [mean_posiRes; mean_posi(1), mean_posi(2)];
+    kal_mean_posiRes = [kal_mean_posiRes; kal_res.mean_x, kal_res.mean_y];
 
     % kalmanDataArr = [kalmanDataArr;pos_x, kal_res.pos_x_est, kal_res.pos_x_cor, mean_posi(1), kal_res.k_x...
     %                 , pos_y, kal_res.pos_y_est, kal_res.pos_y_cor,  mean_posi(2), kal_res.k_y];

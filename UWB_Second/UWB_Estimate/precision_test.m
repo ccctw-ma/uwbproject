@@ -79,6 +79,8 @@ posi_hat_dataCell_range = [
 
 distance_measure_set = [];
 distance_intel_set = [];
+
+disable_moving_set = [];
 for i = 1 : length(posi_hat_dataCell_range)
     x_hat = posi_hat_dataCell_range(i, 1);
     y_hat = posi_hat_dataCell_range(i, 2);
@@ -89,10 +91,14 @@ for i = 1 : length(posi_hat_dataCell_range)
         measure_y = posiRes(j, 2);
         intel_x = ftm_posiRes(j, 1);
         intel_y = ftm_posiRes(j, 2);
+        moving_x = kal_posiRes(j, 1);
+        moving_y = kal_posiRes(j, 2);
         distance_measure = sqrt((x_hat - measure_x) ^ 2 + (y_hat - measure_y) ^ 2);
         distance_intel = sqrt((x_hat - intel_x) ^ 2 + (y_hat - intel_y) ^ 2);
+        distance_moving = sqrt((x_hat - moving_x) ^ 2 + (y_hat - moving_y) ^ 2);
         distance_measure_set = [distance_measure_set; distance_measure];
         distance_intel_set = [distance_intel_set; distance_intel];
+        disable_moving_set = [disable_moving_set; distance_moving];
     end
 end
 
@@ -101,7 +107,8 @@ hold on;
 title('运动状态下的定位误差cdf图')
 cdfplot(distance_measure_set);
 cdfplot(distance_intel_set);
-legend('原始观测', 'intel修正');
+cdfplot(disable_moving_set);
+legend('原始观测', 'intel修正', 'moving修正');
 
 %%
 % 绘制测试环境下的参考运动轨迹
