@@ -30,7 +30,8 @@ end
 scatter(point_hat_set(:, 1), point_hat_set(:, 2));
 scatter(posiRes(:, 1), posiRes(:, 2), 'blue');
 scatter(kal_posiRes(:, 1), kal_posiRes(:, 2), 'r');
-% scatter(kal_mean_posiRes(:, 1), kal_mean_posiRes(:, 2));
+scatter(KF.smooth_posiRes(:, 1), KF.smooth_posiRes(:, 2));
+scatter(kal_mean_posiRes(:, 1), kal_mean_posiRes(:, 2));
 % scatter(mean_posiRes(:, 1), mean_posiRes(:, 2));
 % scatter(ftm_posiRes(:, 1), ftm_posiRes(:, 2));
 % scatter(ftm_mean_posiRes(:, 1), ftm_mean_posiRes(:, 2));
@@ -83,7 +84,7 @@ legend('Measured','estimateRes', 'kalmanRes','kalmanGain');
 %%
 figure;
 plot(kalmanDataArr(:, 5:8));
-title("Y");\
+title("Y");
 
 % legend('Measured','estimateRes', 'kalmanRes','meanRes','kalmanGain');
 legend('Measured','estimateRes', 'kalmanRes','kalmanGain');

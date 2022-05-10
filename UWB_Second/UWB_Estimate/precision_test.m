@@ -198,3 +198,8 @@ cdfplot(abs_distance_ftm);
 cdfplot(abs_distance_ori_moving);
 cdfplot(abs_distance_ftm_moving);
 legend('原始静止','intel静止','原始运动','Intel运动');
+
+%%
+for i = 20 : -1 : 10
+    i
+end

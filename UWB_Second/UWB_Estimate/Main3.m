@@ -25,10 +25,11 @@ for index = 1 : length(dataCell)
     [protocol_header, data_type, id, electricity...
      ,pos_x, pos_y, pos_z, time_stamp...
      ,sequence_number, isValid, mean_signal] = parseData(data_row);
+
+     
     
-    if ~isValid || isnan(pos_x) || isnan(pos_y) 
-        invalidDataNum = invalidDataNum + 1;
-        continue;
+    if ~isnan(pos_x) && ~isnan(pos_y) 
+        posiRes = [posiRes; pos_x, pos_y];
     end
 
     % 对滤波器进行初始化
@@ -42,7 +43,7 @@ for index = 1 : length(dataCell)
     kal_res = KF.Run(time_stamp, [pos_x; pos_y]);
     % mean_posi = KF.mean_Kf();
     Kal = [kal_res.pos_x_cor, kal_res.pos_y_cor]
-    posiRes = [posiRes; pos_x, pos_y];
+    
     kal_posiRes = [kal_posiRes; kal_res.pos_x_cor, kal_res.pos_y_cor];
 
     kal_mean_posiRes = [kal_mean_posiRes; kal_res.mean_x, kal_res.mean_y];

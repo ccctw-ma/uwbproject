@@ -10,48 +10,63 @@ classdef Kfclass3 < handle
         H                       % 观测数据的转移方程 Z_n = H * X_n + V_n
         mean_set                % 用于平滑数据采用的均值滑动窗口矩阵
         mean_set_size           % 均值滑动窗口的大小
-        var_set                 % 计算观测数据方差的滑动窗口矩阵
-        var_set_size            % 观测数据方差的窗口大小
-
-        pre_mean_set
-        pre_var_set
-
+    
         R                       % 观测误差
-        R_max                   % 观测误差的上限
-        R_min                   % 观测误差的下限
-        b                       % 遗忘因子
+        R_max                   % 观测误差超过上限后的替代值
+        R_upper_bound           % 观测误差的上限
+        R_min                   % 观测误差超过下限后的替代值
+        R_lower_bound           % 观测误差的下限
+        b                       % 观测误差遗忘因子
+        p                       % 预测误差遗忘因子
         bet                     % 观测误差更新调节参数
         i                       % 迭代步数
         Z                       % 观测数据
         t
         dts %相邻信号之间的距离差
         R_diff_arr
-        
+
+        F_set
+        X_n1_n_set
+        X_n1_n1_set
+        P_n1_n_set
+        P_n1_n1_set
+        smooth_window_size
+        smooth_posiRes
     end
     
     methods 
         function obj = Kfclass3(config)
             obj.mean_set_size = 21;
-            obj.var_set_size = config.init_window_size;
-            
             obj.mean_set = ones(2, obj.mean_set_size);
-            obj.var_set = zeros(2, config.var_set_size);
             
-            obj.P = eye(4) * 0.01;
+            obj.i = 1;
+
             obj.H = [
                 1, 0, 0, 0;
                 0, 0, 1, 0;
             ];
+            obj.P = eye(4) * 0.005;
+            obj.p = 1.1;
+            
+            obj.b = 0.9;
             obj.bet = 1;
-            obj.b = 0.5;
-            obj.i = 1;
-            obj.R = eye(2) * 0.05;
-            obj.R_max = 0.01;
+            obj.R = eye(2) * 0.01;
+            obj.R_upper_bound = 0.01
+            obj.R_max = 1;
+            obj.R_lower_bound = 0;
             obj.R_min = 0.0001;
             obj.K = zeros(4, 2);
 
+            
             obj.dts = [];
             obj.R_diff_arr = [];
+            obj.F_set = [];
+            obj.X_n1_n_set = [];
+            obj.X_n1_n1_set = [];
+            obj.P_n1_n_set = [];
+            obj.P_n1_n1_set = [];
+            obj.smooth_window_size = 20;
+            obj.smooth_posiRes = [];
         end
 
         function obj = initKf(obj, pos_x, pos_y, time_stamp, index)
@@ -75,15 +90,45 @@ classdef Kfclass3 < handle
             mean_res = mean(obj.mean_set, 2);
         end
 
-        function update_var_set(obj, Z)
-            % update the var_set_matrix by sliding window
-            for i = 1 : obj.var_set_size - 1
-                obj.var_set(1, i) = obj.var_set(1, i + 1);
-                obj.var_set(2, i) = obj.var_set(2, i + 1);
+        % RTS区间平滑算法
+        function RTS_range_smooth(obj, F, X_n1_n, X_n1_n1, P_n1_n, P_n1_n1)
+
+            obj.F_set = [obj.F_set; F];
+            obj.X_n1_n_set = [obj.X_n1_n_set; X_n1_n'];
+            obj.P_n1_n_set = [obj.P_n1_n_set; P_n1_n];
+            obj.X_n1_n1_set = [obj.X_n1_n1_set; X_n1_n1'];
+            obj.P_n1_n1_set = [obj.P_n1_n1_set; P_n1_n1];
+
+            X_s_n1 = X_n1_n1;
+            P_s_n1 = P_n1_n1;
+            if length(obj.X_n1_n_set) == obj.smooth_window_size
+
+                for i = obj.smooth_window_size - 1 : -1 : obj.smooth_window_size / 2
+                    K_s_n = obj.P_n1_n1_set(4 * i - 3 : 4 * i, : ) * obj.F_set(4 * i + 1 : 4 * i + 4, : )' / obj.P_n1_n_set(4 * i + 1 : 4 * i + 4, : );
+                    X_s_n = obj.X_n1_n1_set(i, : )' + K_s_n * (X_s_n1 - obj.X_n1_n1_set(i + 1, : )');
+                    P_s_n = obj.P_n1_n1_set(4 * i - 3 : 4 * i, : ) + K_s_n * (P_s_n1 - obj.P_n1_n_set(4 * i + 1 : 4 * i + 4, : )) * K_s_n';
+                    X_s_n1 = X_s_n;
+                    P_s_n1 = P_s_n;                  
+                end
+
+                j = obj.smooth_window_size / 2;
+                X_f_j = obj.X_n1_n1_set(j, : )';
+                P_f_j = obj.P_n1_n1_set(4 * j - 3 : 4 * j, : );
+                X_b_j = X_s_n1;
+                P_b_j = P_s_n1;
+                X_j = (P_f_j + P_b_j) \ (P_b_j * X_f_j + P_f_j * X_b_j); 
+
+                obj.smooth_posiRes = [obj.smooth_posiRes; X_j(1), X_j(3)];
+
+                % 清空队列首的数据
+                obj.F_set(1 : 4, :) = [];
+                obj.X_n1_n_set(1, :) = [];
+                obj.P_n1_n_set(1 : 4, :) = [];
+                obj.X_n1_n1_set(1, :) = [];
+                obj.P_n1_n1_set(1 : 4, :) = [];
             end
-            obj.var_set(1, obj.var_set_size) = Z(1);
-            obj.var_set(2, obj.var_set_size) = Z(2);
         end
+     
 
         % 更新陈旧观测噪声的置信比例 不断减小陈旧量测噪声的影响
         function updateBet(obj)
@@ -99,6 +144,8 @@ classdef Kfclass3 < handle
                 0,  0,   1,    dt;
                 0,  0,   0,    1;
             ];
+
+            
             
             % Q is the process noise matrix
             % Q = [
@@ -117,7 +164,6 @@ classdef Kfclass3 < handle
             ] * 0.1;
             
 
-        
             X_n_n = obj.X_n1;
 
             P_n_n = obj.P;
@@ -130,30 +176,37 @@ classdef Kfclass3 < handle
 
             X_i_0 = X_n1_n;                     % 为序贯滤波迭代使用
             P_i_0 = P_n1_n;
-            % 因为R的维度(2 * 2)所以序贯滤波的迭代次数为2
-            for i = 1 : 2
-                % 第i维度观测-预测误差(即新息innovation) 
-                Z_n_diff_i = Z_n(i) - obj.H(i, :) * X_i_0;
-                % 第i维度的量测误差
-                R_diff_i = Z_n_diff_i ^ 2 - obj.H(i, :) * P_i_0 * obj.H(i, :)';
-                %对R对角线上的元素进行校验 排除异常值确保R的正定性
-                obj.R_diff_arr = [obj.R_diff_arr; R_diff_i];
-                if R_diff_i < obj.R_min
-                    obj.R(i, i) = (1 - obj.bet) * obj.R(i, i) + obj.bet * obj.R_min;
-                elseif R_diff_i > obj.R_max
-                    % obj.R(i, i) = obj.R_max ; % 待调整
-                    obj.R(i, i) = 1;
-                else
-                    obj.R(i, i) = (1 - obj.bet) * obj.R(i, i) + obj.bet * R_diff_i;
+
+
+            % 如果观测数据是无效数据 那么就使用预测值进行替代
+            if isnan(Z(1)) || isnan(Z(2))
+                X_i_1 = X_i_0;
+                P_i_1 = P_i_0 * obj.p;
+            else
+                % 因为R的维度(2 * 2)所以序贯滤波的迭代次数为2
+                for i = 1 : 2
+                    % 第i维度观测-预测误差(即新息innovation) 
+                    Z_n_diff_i = Z_n(i) - obj.H(i, :) * X_i_0;
+                    % 第i维度的量测误差
+                    R_diff_i = Z_n_diff_i ^ 2 - obj.H(i, :) * P_i_0 * obj.H(i, :)';
+                    %对R对角线上的元素进行校验 排除异常值确保R的正定性
+                    obj.R_diff_arr = [obj.R_diff_arr; R_diff_i];
+                    if R_diff_i < obj.R_lower_bound
+                        obj.R(i, i) = (1 - obj.bet) * obj.R(i, i) + obj.bet * obj.R_min;
+                    elseif R_diff_i > obj.R_upper_bound
+                        obj.R(i, i) = obj.R_max;
+                    else
+                        obj.R(i, i) = (1 - obj.bet) * obj.R(i, i) + obj.bet * R_diff_i;
+                    end
+                    K_i_1 = P_i_0 * obj.H(i, :)' / (obj.H(i, :) * P_i_0 * obj.H(i, :)' + obj.R(i, i));
+
+                    obj.K(:, i) = K_i_1;
+
+                    X_i_1 = X_i_0 + K_i_1 * (Z_n(i) - obj.H(i, :) * X_i_0);
+                    P_i_1 = (eye(4) - K_i_1 * obj.H(i, :)) * P_i_0;
+                    X_i_0 = X_i_1;
+                    P_i_0 = P_i_1;
                 end
-                K_i_1 = P_i_0 * obj.H(i, :)' / (obj.H(i, :) * P_i_0 * obj.H(i, :)' + obj.R(i, i));
-
-                obj.K(:, i) = K_i_1;
-
-                X_i_1 = X_i_0 + K_i_1 * (Z_n(i) - obj.H(i, :) * X_i_0);
-                P_i_1 = (eye(4) - K_i_1 * obj.H(i, :)) * P_i_0;
-                X_i_0 = X_i_1;
-                P_i_0 = P_i_1;
             end
 
             X_n1_n1 = X_i_1;
@@ -161,6 +214,8 @@ classdef Kfclass3 < handle
 
             % 更新观测误差影响因子
             obj.updateBet();
+            
+            % obj.RTS_range_smooth(F, X_n1_n, X_n1_n1, P_n1_n, P_n1_n1);
 
             obj.X_n = X_n1_n;
             obj.X_n1 = X_n1_n1;
