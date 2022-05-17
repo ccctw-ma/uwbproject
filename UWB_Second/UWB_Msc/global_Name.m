@@ -1,5 +1,8 @@
-
 %global_Name
+
+
+systemConstant;
+
 
 % anchor name
 Anchor1 = 'F5024552';
@@ -12,13 +15,18 @@ AnchorMap = containers.Map({'F5024552','F5226439','F5024549','F5226354'} , {1,2,
 
 Label = '05C78E1B';
 
+
+
 dataPollingTimes = 256;
 
 % 基站之间交互的时间矩阵
 anchorInteractionTimeMatrix = zeros(4,4,256);
 
 % 基站之间交互的序号矩阵
-anchorInteractionSeqMatrix = zeros(4,4,1) + 1;
+anchorInteractionSeqMatrix = zeros(4, 4);
+
+% 基站之间进行拟合的参数矩阵
+anchorFittingParamsMatrix = zeros(4, 4, 2);
 
 % 基站时间拟合的窗口值 这个需要根据实际情况进行动态变化
 window = 8;
@@ -67,14 +75,8 @@ seqCount3 = 1;
 lastIndex2 = 0;
 lastIndex3 = 0;
 
-% 拟合基站接受标签信号使用
-global labelToAnchorTimeFittingMatrix;
-global fittingParamsMatrix;
-global hasFitted;
 
-labelToAnchorTimeFittingMatrix = zeros(4, window, 2);
-fittingParamsMatrix = [1, 0; 1, 0; 1, 0; 1, 0];
-hasFitted = 0;
+
 
 global rMinus;
 global posiRes;
@@ -83,5 +85,41 @@ global timeBefore;
 
 rMinus = [];
 posiRes = [];
-timeAfter = [];
+% 同步前的数据
 timeBefore = [];
+% 同步后的数据
+timeAfter = [];
+% 过滤没能正确同步的数据
+timeAfterFilter = [];
+
+
+% 使用卡尔曼滤波处理时钟差
+global R_X_n_n;
+global R_P_n_n;
+% 求观测噪声使用的观测数据集合
+global vars_set_R;
+global var_set_size;
+% 平滑数据使用的过滤数据集合
+global sum_set_R;
+global sum_set_size;
+
+
+% R_X = zeros(3, 1);
+% R_P = zeros(3, 1) * 100;
+% var_set_size = 3;
+% sum_set_size = 10;
+% vars_set_R = zeros(3, var_set_size);
+% sum_set_R = zeros(3, sum_set_size);
+
+
+R_X_n_n = zeros(2, 3);
+R_P_n_n = ones(2, 2, 3) * 100;
+var_set_size = 5;
+sum_set_size = 10;
+vars_set_R = zeros(3, var_set_size);
+sum_set_R = ones(3, sum_set_size);
+
+global testDataArr;
+testDataArr = [];
+
+

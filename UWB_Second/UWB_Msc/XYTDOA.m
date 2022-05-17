@@ -12,7 +12,10 @@ function [Pos_X,Pos_Y] = XYTDOA(time,seqNum)
     BS_Y_MIN = Anchor1PosY;
     BS_Y_MAX = Anchor1PosY;
 
-    BS = [Anchor1PosX,Anchor1PosY;Anchor2PosX,Anchor2PosY;Anchor3PosX,Anchor3PosY;Anchor4PosX,Anchor4PosY];
+    BS = [Anchor1PosX, Anchor1PosY;
+        Anchor2PosX, Anchor2PosY;
+        Anchor3PosX, Anchor3PosY;
+        Anchor4PosX, Anchor4PosY];
 
     for i = 1:3
         if BS_X_MAX < BS(i+1,1)
@@ -29,14 +32,16 @@ function [Pos_X,Pos_Y] = XYTDOA(time,seqNum)
         end
     end
 
-    R21 = abs((time(2)-time(1))*C);
-    R31 = abs((time(3)-time(1))*C);
-    R41 = abs((time(4)-time(1))*C);
+    R21 = abs((time(2)-time(1))*C/10);
+    R31 = abs((time(3)-time(1))*C/10);
+    R41 = abs((time(4)-time(1))*C/10);
 
-    fprintf("%d: R2-R1=%f m,R3-R1=%f m,R4-R1=%f m\n",seqNum, R21,R31,R41);
+    % fprintf("%d: R2-R1=%f m,R3-R1=%f m,R4-R1=%f m\n",seqNum, R21,R31,R41);
     global rMinus;
-    rMinus = [rMinus;seqNum,R21,R31,R41];
-    h = [0.5*(power(R21,2)-K2+K1);0.5*(power(R31,2)-K3+K1);0.5*(power(R41,2)-K4+K1)];
+    rMinus = [rMinus;seqNum,(time(2)-time(1))*C,(time(3)-time(1))*C,(time(4)-time(1))*C];
+    h = [0.5*(power(R21,2)-K2+K1);
+        0.5*(power(R31,2)-K3+K1);
+        0.5*(power(R41,2)-K4+K1)];
 
     x21 = Anchor2PosX - Anchor1PosX;
     x31 = Anchor3PosX - Anchor1PosX;
@@ -53,9 +58,11 @@ function [Pos_X,Pos_Y] = XYTDOA(time,seqNum)
     Za0 = temp0 * Ga' * h;
     
 %     Calculate_FI
-    B = [sqrt(power(BS(2,1)-Za0(1),2) + power(BS(2,2)-Za0(2),2)),0,0;0,sqrt(power(BS(3,1)-Za0(1),2) + power(BS(3,2)-Za0(2),2)),0;0,0,sqrt(power(BS(4,1)-Za0(1),2) + power(BS(4,2)-Za0(2),2))];
+    B = [sqrt(power(BS(2,1)-Za0(1),2) + power(BS(2,2)-Za0(2), 2)), 0, 0;
+         0, sqrt(power(BS(3,1)-Za0(1),2) + power(BS(3,2)-Za0(2),2)), 0;
+         0, 0, sqrt(power(BS(4,1)-Za0(1),2) + power(BS(4,2)-Za0(2),2))];
     FI = B * Q * B;
-    FI = FI * power(C,2);
+    FI = FI * power(C/10,2);
 
 %     Calculate_Za1
     temp1 = Inverse(FI);
@@ -84,7 +91,10 @@ function [Pos_X,Pos_Y] = XYTDOA(time,seqNum)
     Za2 = Za2 * sh;
 
 %     Calculate_POS
-    POS = [sqrt(Za2(1)) + Anchor1PosX,sqrt(Za2(2)) + Anchor1PosY;-sqrt(Za2(1)) + Anchor1PosX,-sqrt(Za2(2)) + Anchor1PosY;sqrt(Za2(1)) - Anchor1PosX,sqrt(Za2(2)) - Anchor1PosY;-sqrt(Za2(1)) - Anchor1PosX,-sqrt(Za2(2)) - Anchor1PosY];
+    POS = [sqrt(Za2(1)) + Anchor1PosX,sqrt(Za2(2)) + Anchor1PosY;
+    -sqrt(Za2(1)) + Anchor1PosX,-sqrt(Za2(2)) + Anchor1PosY;
+    sqrt(Za2(1)) - Anchor1PosX,sqrt(Za2(2)) - Anchor1PosY;
+    -sqrt(Za2(1)) - Anchor1PosX,-sqrt(Za2(2)) - Anchor1PosY];
     for i = 1:4
         if (POS(i,1) < BS_X_MAX) && (POS(i,1) > BS_X_MIN)
             Pos_X = POS(i,1);
