@@ -184,7 +184,7 @@ classdef KfFtmMovclass < handle
                     latErrPredict
                     minSigma
                     obj.X
-                    R = 100;
+                    R = 10;
                 end  
             end
             inovCov = H * P * H' + R;
