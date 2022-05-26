@@ -1,5 +1,5 @@
 clc; 
-close all; % clean window
+% close all; % clean window
 
 globalConstant;
 globalVariable;
@@ -13,14 +13,11 @@ mean_posiRes = [];
 kal_posiRes = [];
 kal_mean_posiRes = [];
 kalmanDataArr = [];
-signals = [];
+times = [];
+
 
 config = initSystemConfig();
 KF = Kfclass4(config);
-
-h = animatedline;
-axis([-1, 20, -1 , 18]);
-axis equal;
 
 for index = 1 : length(dataCell)
 
@@ -31,39 +28,33 @@ for index = 1 : length(dataCell)
      ,pos_x, pos_y, pos_z, time_stamp...
      ,sequence_number, isValid, mean_signal] = parseData(data_row);
 
-    signals = [signals; mean_signal];
-    
-%     if ~isnan(pos_x) && ~isnan(pos_y) 
-%         
-%     end
     posiRes = [posiRes; pos_x, pos_y];
+    times = [times; time_stamp];
+    node.pos_x = pos_x;
+    node.pos_y = pos_y;
+    node.time_stamp = time_stamp;
+    node.mean_signal = mean_signal;
     % 对滤波器进行初始化
     if config.initIndex == 1
         if isnan(pos_x) || isnan(pos_y)
             continue;
         end
-        KF.initKf(pos_x, pos_y, time_stamp);
+        KF.initKf(node);
         config.initIndex = config.initIndex + 1;
+        kal_posiRes = [kal_posiRes; pos_x, pos_y];
         continue;
     end
-    Z = [pos_x, pos_y]
-%     addpoints(h, pos_x, pos_y);
-%     drawnow limitrate
-%     pause(0.0000001);
-    kal_res = KF.Run(time_stamp, [pos_x; pos_y]);
-    % mean_posi = KF.mean_Kf();
-    Kal = [kal_res.pos_x_cor, kal_res.pos_y_cor]
-    addpoints(h, kal_res.pos_x_cor, kal_res.pos_y_cor);
-    drawnow limitrate
-    pause(0.0000001);
+   
+    kal_res = KF.Run(node);
+   
     kal_posiRes = [kal_posiRes; kal_res.pos_x_cor, kal_res.pos_y_cor];
+  
 
-%     kal_mean_posiRes = [kal_mean_posiRes; kal_res.mean_x, kal_res.mean_y];
 
     % kalmanDataArr = [kalmanDataArr;pos_x, kal_res.pos_x_est, kal_res.pos_x_cor, mean_posi(1), kal_res.k_x...
     %                 , pos_y, kal_res.pos_y_est, kal_res.pos_y_cor,  mean_posi(2), kal_res.k_y];
-    kalmanDataArr = [kalmanDataArr;pos_x, kal_res.pos_x_est, kal_res.pos_x_cor, kal_res.k_x...
-                        ,pos_y, kal_res.pos_y_est, kal_res.pos_y_cor, kal_res.k_y];
+    kalmanDataArr = [kalmanDataArr;pos_x, kal_res.pos_x_est, kal_res.pos_x_cor, kal_res.k_x, kal_res.v_x...
+                        ,pos_y, kal_res.pos_y_est, kal_res.pos_y_cor, kal_res.k_y, kal_res.v_y];
     
 
 end
