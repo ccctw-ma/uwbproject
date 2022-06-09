@@ -23,7 +23,7 @@ public class KalmanFilter {
     private Matrix Z;
     private final Matrix R_base;
     private final double varQ; // 过程噪声方差基数
-    private double measNoiseVar; // 量测数据方差
+    private final double measNoiseVar; // 量测数据方差
     private final double b; // 速度方差遗忘因子
     private final double R_upper_bound;
     private double var_vx_pre;
@@ -46,12 +46,12 @@ public class KalmanFilter {
                 {0, 0, 1, 0}
         });
         this.P = Matrix.identity(4, 4).times(0.01);
+        this.measNoiseVar = 0.1;
         this.R_base = new Matrix(new double[][]{
                 {this.measNoiseVar, 0},
                 {0, this.measNoiseVar}
         });
         this.b = 0.8;
-        this.measNoiseVar = 0.1;
         this.varQ = 0.02;
         this.R_upper_bound = 2;
         this.realTimeDataSet = new ArrayDeque<>();
@@ -136,25 +136,24 @@ public class KalmanFilter {
         });
         Matrix Q = new Matrix(new double[][]{
                 {dt * this.varQ, 0, 0, 0},
-                {0, dt * this.varQ, 0, 0},
+                {0, 2 * dt * this.varQ, 0, 0},
                 {0, 0, dt * this.varQ, 0},
-                {0, 0, 0, dt * this.varQ}
+                {0, 0, 0, 2 * dt * this.varQ}
         });
         Matrix X_n_n = this.X_n1;
         Matrix P_n_n = this.P;
         Matrix X_n1_n = F.times(X_n_n);
         Matrix P_n1_n = F.times(P_n_n).times(F.transpose()).plus(Q);
-        Matrix Z_n = curZ;
         Matrix X_n1_n1 = null, P_n1_n1 = null;
 
         boolean isValidMeasurementData = true;
         List<Double> realTimeDataAnalysisRes = realTimeDataAnalysis(cell);
         // 观测结果为NaN或者超过设定的界限那么观测结果为无效数据
-        if (Double.isNaN(cell.x) || Double.isNaN(cell.y)) {
+        if (Double.isNaN(curZ.get(0, 0)) || Double.isNaN(curZ.get(1, 0))) {
             isValidMeasurementData = false;
         } else {
             // 新息向量
-            Matrix innovation = Z_n.minus(this.H.times(X_n1_n));
+            Matrix innovation = curZ.minus(this.H.times(X_n1_n));
             Matrix baseDiff = this.H.times(P_n1_n).times(this.H.transpose()).plus(this.R_base);
             double R_diff = Math.abs(innovation.transpose().times(baseDiff.inverse()).times(innovation).get(0, 0));
             double varX = realTimeDataAnalysisRes.get(0);
@@ -163,7 +162,7 @@ public class KalmanFilter {
             double varVY = realTimeDataAnalysisRes.get(3);
             varVX = this.b * this.var_vx_pre + (1 - this.b) * varVX;
             varVY = this.b * this.var_vy_pre + (1 - this.b) * varVY;
-            Matrix R_n = null;
+            Matrix R_n;
             if (R_diff <= this.R_upper_bound) {
                 R_n = new Matrix(new double[][]{
                         {(this.measNoiseVar + varX) * Math.max(R_diff, 0.5), 0},
@@ -185,7 +184,7 @@ public class KalmanFilter {
             this.var_vy_pre = varVY;
             Matrix K_n = P_n1_n.times(this.H.transpose()).times(this.H.times(P_n1_n).times(this.H.transpose()).plus(R_n).inverse());
             P_n1_n1 = Matrix.identity(4, 4).minus(K_n.times(this.H)).times(P_n1_n);
-            X_n1_n1 = X_n1_n.plus(K_n.times(Z_n.minus(this.H.times(X_n1_n))));
+            X_n1_n1 = X_n1_n.plus(K_n.times(curZ.minus(this.H.times(X_n1_n))));
         }
         // 是无效数据
         if (!isValidMeasurementData) {

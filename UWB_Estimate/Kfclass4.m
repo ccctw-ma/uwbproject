@@ -278,10 +278,10 @@ classdef Kfclass4 < handle
                 p_y_var = real_time_analysis_res(4);
                 v_y = real_time_analysis_res(5);
                 v_y_var = real_time_analysis_res(6);
-                disp([p_x_var, v_x, v_x_var, p_y_var, v_y, v_y_var]);
+%                 disp([p_x_var, v_x, v_x_var, p_y_var, v_y, v_y_var]);
                 v_x_var = obj.vb * obj.v_x_var_pre + (1 - obj.vb) * v_x_var;
                 v_y_var = obj.vb * obj.v_y_var_pre + (1 - obj.vb) * v_y_var;
-                disp([v_x_var, v_y_var]);
+%                 disp([v_x_var, v_y_var]);
                 if R_diff <= obj.R_upper_bound
 %                     R_n = (1 - obj.bet) * obj.R + obj.bet * abs(innovation * innovation' - obj.H * P_n1_n * obj.H');
 %                     R_n = [(obj.MeasNoiseVar + mearsurement_var(1)) / 2, 0;

@@ -1,6 +1,6 @@
 
 
-tarFileName = "test.txt";
+tarFileName = "dataCell_0524_moving1.txt";
 fop = fopen(tarFileName,'wt');
 
 for i = 1 : length(dataCell)
