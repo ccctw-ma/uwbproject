@@ -199,7 +199,7 @@ public class KalmanFilter {
         this.Z = curZ;
     }
 
-    public double[] Run(DataCell cell) {
+    public double[] run(DataCell cell) {
         double dt = (Math.max(cell.t - this.time, 0) + 86400) % 86400;
         if (dt == 0.0) dt = 0.005;
         this.time = this.time + dt;

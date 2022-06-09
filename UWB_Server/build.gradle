@@ -16,6 +16,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     // https://mvnrepository.com/artifact/gov.nist.math/jama
     implementation 'gov.nist.math:jama:1.0.3'
+    // https://mvnrepository.com/artifact/net.sourceforge.jmatio/jmatio
+    implementation 'net.sourceforge.jmatio:jmatio:1.0'
+    // https://mvnrepository.com/artifact/us.hebi.matlab.mat/mfl-core
+    implementation 'us.hebi.matlab.mat:mfl-core:0.5.9'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

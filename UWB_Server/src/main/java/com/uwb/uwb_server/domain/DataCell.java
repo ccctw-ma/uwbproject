@@ -42,6 +42,12 @@ public class DataCell {
         this.t = timeStamp;
     }
 
+    public DataCell(double[] data) {
+        this.x = data[0];
+        this.y = data[1];
+        this.t = data[2];
+    }
+
     public DataCell(String id, double x, double y, double z, double timeStamp, long sequenceNumber, boolean isValid, double meanSignal) {
         this.ID = id;
         this.x = x;
