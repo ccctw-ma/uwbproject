@@ -5,56 +5,56 @@ globalConstant;
 globalVariable;
 
 tic();
+invalidDataNum = 0;
+
+
 posiRes = [];
 mean_posiRes = [];
 kal_posiRes = [];
+kal_mean_posiRes = [];
 kalmanDataArr = [];
-invalidDataNum = 0;
+times = [];
 
-% figure();
-% hold on;
-% axis([-1, 7, -1 , 5]);
 
 config = initSystemConfig();
-KF = Kfclass(config);
+KF = Kfclass5(config);
 
 for index = 1 : length(dataCell)
-% for index = 1 : 1000
+
     data_row = dataCell(index, :);
+
+    % 拿到实时的观测数据
     [protocol_header, data_type, id, electricity...
      ,pos_x, pos_y, pos_z, time_stamp...
      ,sequence_number, isValid, mean_signal] = parseData(data_row);
-    
-    if ~isValid || isnan(pos_x) || isnan(pos_y) 
-        invalidDataNum = invalidDataNum + 1;
-        continue;
-    end
-
-    if config.initIndex < config.init_window_size
-        KF.initKf(pos_x, pos_y, time_stamp, config.initIndex);
-        config.initIndex = config.initIndex + 1;
-        continue;
-    elseif config.initIndex == config.init_window_size
-        KF.finishInit(pos_x, pos_y, time_stamp, config.initIndex);
-        config.initIndex = config.initIndex + 1;
-        continue;
-    end
-
-    kal_res = KF.Run(time_stamp, [pos_x; pos_y]);
-    [pos_x, pos_y]
-    mean_posi = KF.mean_Kf();
 
     posiRes = [posiRes; pos_x, pos_y];
+    times = [times; time_stamp];
+    node.pos_x = pos_x;
+    node.pos_y = pos_y;
+    node.time_stamp = time_stamp;
+    node.mean_signal = mean_signal;
+    % 对滤波器进行初始化
+    if config.initIndex == 1
+        if isnan(pos_x) || isnan(pos_y)
+            continue;
+        end
+        KF.initKf(node);
+        config.initIndex = config.initIndex + 1;
+        kal_posiRes = [kal_posiRes; pos_x, pos_y];
+        continue;
+    end
+   
+    kal_res = KF.Run(node);
+   
     kal_posiRes = [kal_posiRes; kal_res.pos_x_cor, kal_res.pos_y_cor];
-    mean_posiRes = [mean_posiRes; mean_posi(1), mean_posi(2)];
-
-    kalmanDataArr = [kalmanDataArr;pos_x, kal_res.pos_x_est, kal_res.pos_x_cor, mean_posi(1), kal_res.k_x...
-                    , pos_y, kal_res.pos_y_est, kal_res.pos_y_cor,  mean_posi(2), kal_res.k_y];
-    % scatter(pos_x, pos_y, 'blue');
-    % scatter(mean_posi(1), mean_posi(2), 'r');
-    % pause(0.00001);
-
+  
+    kalmanDataArr = [kalmanDataArr;pos_x, kal_res.pos_x_est, kal_res.pos_x_cor, kal_res.k_x, kal_res.v_x...
+                        ,pos_y, kal_res.pos_y_est, kal_res.pos_y_cor, kal_res.k_y, kal_res.v_y];
+    
+    kal_mean_posiRes = [kal_mean_posiRes; kal_res.pos_x_smo, kal_res.pos_y_smo];
 end
+resTestSmooth();
 toc();
 
 function [protocol_header, data_type, id, electricity, pos_x, pos_y, pos_z, time_stamp, sequence_number, isValid, mean_signal] = parseData(data)
@@ -71,17 +71,12 @@ function [protocol_header, data_type, id, electricity, pos_x, pos_y, pos_z, time
 
     sequence_number = str2double(data(10)); %序号
     isValid = str2double(data(13));         %是否有效
-    mean_signal = data(15);                 %信号均值
+    mean_signal = str2double(data(15));     %信号均值
 
 end
 
 
 function time = formatTime(time_stamp)
-    % time = datetime(strrep(time_stamp, "T", " "), 'InputFormat', 'yyyy-MM-dd HH:mm:ss.SSS');
-    % dur = time - datetime('1970-01-01', 'InputFormat', 'yyyy-MM-dd');
-    % time = milliseconds(dur) / 1000;
-    % days = datenum(time_stamp(1:10));
-
     time_stamp = char(time_stamp);
     hour =  str2double(time_stamp(12:13));
     minute = str2double(time_stamp(15:16));

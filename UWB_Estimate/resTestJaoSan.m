@@ -1,3 +1,9 @@
+figure
+hold on
+plot(posiRes(:, 1))
+plot(kal_posiRes(:, 1))
+hold off
+%%
 % 基站的位置
 anchors = [
     0, 7.2;
@@ -20,15 +26,21 @@ end
 
 % scatter(point_hat_set(:, 1), point_hat_set(:, 2));
 
+
 scatter(posiRes(:, 1), posiRes(:, 2), 'blue');
+
 scatter(kal_posiRes(:, 1), kal_posiRes(:, 2), 'r');
-scatter(KF.outrange_mea_arr(:, 1), KF.outrange_mea_arr(: ,2), 'magenta');
-scatter(KF.unValid_mea_arr(:, 1), KF.unValid_mea_arr(: ,2), 'yellow');
+xlabel('x轴坐标（米）')
+ylabel('y轴坐标（米）')
+% title('原始定位结果（蓝）与卡尔曼滤波结果（红）对比图')
+% scatter(KF.outrange_mea_arr(:, 1), KF.outrange_mea_arr(: ,2), 'magenta');
+% scatter(KF.unValid_mea_arr(:, 1), KF.unValid_mea_arr(: ,2), 'yellow');
 
 %% 绘制一组数据的2个点图， x和y的线图， 结果点带有时序信息的三维图
 clc;
 close all;
-Main4();
+% Main4();
+% Main()
 % 基站的位置
 anchors = [
     0, 7.2;
@@ -58,9 +70,9 @@ for i = 1 : size(anchors, 1)
 end
 
 scatter(posiRes(:, 1), posiRes(:, 2), 'blue');
-scatter(KF.outrange_mea_arr(:, 1), KF.outrange_mea_arr(: ,2), 'magenta');
+% scatter(KF.outrange_mea_arr(:, 1), KF.outrange_mea_arr(: ,2), 'magenta');
 scatter(kal_posiRes(:, 1), kal_posiRes(:, 2), 'r');
-scatter(KF.unValid_mea_arr(:, 1), KF.unValid_mea_arr(: ,2), 'yellow');
+% scatter(KF.unValid_mea_arr(:, 1), KF.unValid_mea_arr(: ,2), 'yellow');
 hold off;
 
 nexttile(4);
@@ -198,11 +210,14 @@ tile=tiledlayout(1, 3, 'TileSpacing', 'tight', 'Padding', 'tight');
 
 nexttile(1);
 load('dataCell_0524_moving2.mat');
+% load('dataCell_0524_moving3.mat');
 Main4();
 
 points = [700, 1401, 3.3;];
+% points = [4050, 4350, 3.4;];
+% points = [300, 1300, 0.98;];
 dis_ori = [];
-dis_kal = [];
+dis_adapte_kal = [];
 start_index = points(1);
 end_index = points(2);
 x1 = posiRes(start_index, 1);
@@ -222,15 +237,20 @@ for j = start_index : end_index
     end
     kx = kal_posiRes(j, 1);
     ky = kal_posiRes(j, 2);
-    dis_kal = [dis_kal; sqrt((kx - rx) ^ 2 + (ky - ry) ^ 2)];
+    dis_adapte_kal = [dis_adapte_kal; sqrt((kx - rx) ^ 2 + (ky - ry) ^ 2)];
 end
-
 
 hold on;
 cdfplot(dis_ori);
-cdfplot(dis_kal);
-legend('mearsurement', 'kalman');
+cdfplot(dis_adapte_kal);
+
+
+
+% cdfplot(dis_kal);
+legend('mearsurement', 'adaptiveKalman', 'kalman');
 title(["速度为",num2str(round(abs(v), 2))],'m/s')
+% title("量测，卡尔曼滤波和自适应卡尔曼滤波定位误差cdf图")
+xlabel("定位误差单位（m）")
 hold off;
 
 
@@ -332,7 +352,76 @@ cdfplot(dis_kal);
 legend('mearsurement', 'kalman');
 title(["速度为",num2str(round(abs(v), 2))],'m/s')
 hold off;
+%%
+load('dataCell_0524_moving2.mat');
 
+
+
+Main4();
+% points = [700, 1401, 3.3;];
+points = [700, 1401, 3.3;];
+dis_ori = [];
+dis_adapt_kal = [];
+start_index = points(1);
+end_index = points(2);
+x1 = posiRes(start_index, 1);
+t1 = times(start_index);
+x2 = posiRes(end_index, 1);
+t2 = times(end_index);
+v = (x2 - x1) / (t2 - t1);
+ry = points(3);
+for j = start_index : end_index
+    t = times(j);
+    rx = (t - t1) * v + x1;
+
+    mx = posiRes(j, 1);
+    my = posiRes(j, 2);
+    if ~isnan(mx) && ~isnan(my)
+        dis_ori = [dis_ori; sqrt((mx - rx) ^ 2 + (my - ry) ^ 2)];
+    end
+    kx = kal_posiRes(j, 1);
+    ky = kal_posiRes(j, 2);
+    dis_adapt_kal = [dis_adapt_kal; sqrt((kx - rx) ^ 2 + (ky - ry) ^ 2)];
+end
+
+
+Main();
+
+dis_ori = [];
+dis_kal = [];
+start_index = points(1);
+end_index = points(2);
+x1 = posiRes(start_index, 1);
+t1 = times(start_index);
+x2 = posiRes(end_index, 1);
+t2 = times(end_index);
+v = (x2 - x1) / (t2 - t1);
+ry = points(3);
+for j = start_index : end_index
+    t = times(j);
+    rx = (t - t1) * v + x1;
+
+    mx = posiRes(j, 1);
+    my = posiRes(j, 2);
+    if ~isnan(mx) && ~isnan(my)
+        dis_ori = [dis_ori; sqrt((mx - rx) ^ 2 + (my - ry) ^ 2)];
+    end
+    kx = kal_posiRes(j, 1);
+    ky = kal_posiRes(j, 2);
+    dis_kal = [dis_kal; sqrt((kx - rx) ^ 2 + (ky - ry) ^ 2)];
+end
+
+
+figure();
+hold on;
+cdfplot(dis_ori);
+cdfplot(dis_kal);
+cdfplot(dis_adapt_kal);
+legend('mearsurement', 'KF','AKF');
+xlabel('定位误差（m）');
+t = strcat(["速度为",num2str(round(abs(v), 2)),'m/s']);
+% title(t)
+hold off;
 
     
 

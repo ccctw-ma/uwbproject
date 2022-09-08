@@ -76,17 +76,17 @@ legend('观测','预测','修正');
 
 %%
 figure;
-plot(kalmanDataArr(:, 1:4));
+plot(kalmanDataArr(:, 1:5));
 title("X");
 % legend('Measured','estimateRes', 'kalmanRes','meanRes','kalmanGain');
-legend('Measured','estimateRes', 'kalmanRes','kalmanGain');
+legend('Measured','estimateRes', 'kalmanRes','kalmanGain', 'vx');
 %%
 figure;
-plot(kalmanDataArr(:, 5:8));
+plot(kalmanDataArr(:, 6:10));
 title("Y");
 
 % legend('Measured','estimateRes', 'kalmanRes','meanRes','kalmanGain');
-legend('Measured','estimateRes', 'kalmanRes','kalmanGain');
+legend('Measured','estimateRes', 'kalmanRes','kalmanGain', 'vy');
 %%
 % 以三维散点图的形式绘制定位结果
 

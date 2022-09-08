@@ -37,7 +37,7 @@ classdef Kfclass < handle
 
             obj.b = 0.95;
             obj.i = 1;
-            obj.R = eye(2);
+            obj.R = eye(2) ;
 
             obj.dts = [];
             obj.abnormal_mea = [];
@@ -127,15 +127,15 @@ classdef Kfclass < handle
             P_n1_n = F * P_n_n * F' + Q;
 
 
-            measurement_innovation =  mean(diff(obj.var_set, 1, 2), 2);
-            cur_innovation = Z - obj.Z;
+%             measurement_innovation =  mean(diff(obj.var_set, 1, 2), 2);
+%             cur_innovation = Z - obj.Z;
             % obj.abnormal_mea = [obj.abnormal_mea; measurement_innovation(1),  cur_innovation(1)];
-            obj.update_var_set(Z);
+%             obj.update_var_set(Z);
             % if sum(cur_innovation > 3 * measurement_innovation)
-            if abs(X_n1_n(1) - Z(1)) > 0.1 || abs(X_n1_n(4) - Z(2)) > 0.1
-                obj.abnormal_mea = [obj.abnormal_mea; Z'];
-                R_n = eye(2) * 50;
-            end
+%             if abs(X_n1_n(1) - Z(1)) > 0.1 || abs(X_n1_n(4) - Z(2)) > 0.1
+%                 obj.abnormal_mea = [obj.abnormal_mea; Z'];
+%                 R_n = eye(2) * 50;
+%             end
 
 
             Z_n = Z;
