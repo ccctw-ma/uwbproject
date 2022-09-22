@@ -134,7 +134,7 @@ dataSet = [
     "dataCell_0524_random.mat", "..\UWB_Video\uwb_0524_random.mp4", 0, 0;        % 10
 ];
 
-selectedIndex = 3;
+selectedIndex = 8;
 dataCellFile = dataSet(selectedIndex, 1);
 dataVideoFile = dataSet(selectedIndex, 2);
 dataDelay = str2double(dataSet(selectedIndex, 3));

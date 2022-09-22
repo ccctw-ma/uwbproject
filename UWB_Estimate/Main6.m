@@ -17,7 +17,7 @@ times = [];
 
 
 config = initSystemConfig();
-KF = Kfclass5(config);
+KF = Kfclass6(config);
 
 for index = 1 : length(dataCell)
 
@@ -48,13 +48,13 @@ for index = 1 : length(dataCell)
     kal_res = KF.Run(node);
    
     kal_posiRes = [kal_posiRes; kal_res.pos_x_cor, kal_res.pos_y_cor];
-  
+    
     kalmanDataArr = [kalmanDataArr;pos_x, kal_res.pos_x_est, kal_res.pos_x_cor, kal_res.k_x, kal_res.v_x...
                         ,pos_y, kal_res.pos_y_est, kal_res.pos_y_cor, kal_res.k_y, kal_res.v_y];
     
-    kal_mean_posiRes = [kal_mean_posiRes; kal_res.pos_x_smo, kal_res.pos_y_smo];
+% %     kal_mean_posiRes = [kal_mean_posiRes; kal_res.pos_x_smo, kal_res.pos_y_smo];
 end
-resTestSmooth();
+resTestSmooth2();
 toc();
 
 function [protocol_header, data_type, id, electricity, pos_x, pos_y, pos_z, time_stamp, sequence_number, isValid, mean_signal] = parseData(data)

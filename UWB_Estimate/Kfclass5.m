@@ -1,4 +1,4 @@
-% version 5.0 主要增加对滤波后的结果的平滑
+% version 5.0 主要增加对滤波后的结果的平滑 后处理方式
 classdef Kfclass5 < handle 
 
 
@@ -52,7 +52,7 @@ classdef Kfclass5 < handle
         mean_posiRes
 
 
-        F_set
+        smooth_set
         X_n1_n_set
         X_n1_n1_set
         P_n1_n_set
@@ -64,6 +64,11 @@ classdef Kfclass5 < handle
         smooth_static_threshold
         smooth_posiRes_set
         smooth_analysis_set
+        smooth_deg_set
+        smooth_static_center
+        smooth_static_step
+        smooth_pre_factor
+        smooth_distance_set
     end
     
     methods 
@@ -120,7 +125,7 @@ classdef Kfclass5 < handle
             obj.mean_posiRes = [];
 
             %用于平滑算法
-            obj.F_set = [];
+            obj.smooth_set = [];
             obj.X_n1_n_set = [];
             obj.X_n1_n1_set = [];
             obj.P_n1_n_set = [];
@@ -128,10 +133,15 @@ classdef Kfclass5 < handle
             obj.smooth_window_max_size = 200; % 存储数据的上限，及窗口的最大值
             obj.smooth_window_min_size = 2; % 窗口的最小值
             obj.smooth_window_size = 2; % 可变
-            obj.smooth_velocity_size = 10; % 用于计算区间速度
+            obj.smooth_velocity_size = 20; % 用于计算区间速度
             obj.smooth_static_threshold = 0.5; % 当速度小于0.5m/s的时候，就大致可以认为是静止的
             obj.smooth_posiRes_set = zeros(3, obj.smooth_window_size);
             obj.smooth_analysis_set = [];
+            obj.smooth_deg_set = [];
+            obj.smooth_static_center = [0, 0];
+            obj.smooth_static_step = 0;
+            obj.smooth_pre_factor = 0.95;
+            obj.smooth_distance_set = [];
         end
 
         function obj = initKf(obj, node)
@@ -152,6 +162,7 @@ classdef Kfclass5 < handle
                 obj.smooth_posiRes_set(3, i) = node.time_stamp;
             end
             obj.t = node.time_stamp;
+            obj.smooth_static_center = [node.pos_x, node.pos_y];
         end
 
 
@@ -203,6 +214,7 @@ classdef Kfclass5 < handle
 
         % 对滤波结果通过滑动窗口平滑算法进行处理
         function [smooth_pos_x, smooth_pos_y] = sliding_window_smooth(obj, node)
+            % 更新滑动窗口
             for i = 1 : obj.smooth_window_max_size - 1
                 obj.smooth_posiRes_set(1, i) = obj.smooth_posiRes_set(1, i + 1);
                 obj.smooth_posiRes_set(2, i) = obj.smooth_posiRes_set(2, i + 1);
@@ -212,6 +224,10 @@ classdef Kfclass5 < handle
             obj.smooth_posiRes_set(2, obj.smooth_window_max_size) = node.pos_y;
             obj.smooth_posiRes_set(3, obj.smooth_window_max_size) = node.time_stamp;
             
+            % 计算数据处理区间的速度，角度变化
+
+            obj.smooth_deg_set = [obj.smooth_deg_set; obj.getDeg([0, 0] ,[obj.smooth_posiRes_set(1:2, end)])];
+
             vxs = zeros(obj.smooth_velocity_size, 1);
             vys = zeros(obj.smooth_velocity_size, 1);
             for i = 1 : obj.smooth_velocity_size 
@@ -232,30 +248,110 @@ classdef Kfclass5 < handle
             v_y = mean(vys);
             v = sqrt(v_x ^ 2 + v_y ^ 2);
      
-            disp([num2str(v_x),'  ',num2str(v_y), ' ', num2str(v)]);
+%             disp([num2str(v_x),'  ',num2str(v_y), ' ', num2str(v)]);
             obj.smooth_analysis_set = [obj.smooth_analysis_set; v_x, v_y, v];
-            if v > obj.smooth_static_threshold % 认为是非静止状态，平滑窗口大小指数倍减小
-                rate = ceil(v / obj.smooth_static_threshold);
-%                 obj.smooth_window_size = max(floor(obj.smooth_window_size / 2), obj.smooth_window_min_size);
-                obj.smooth_window_size = max(obj.smooth_window_size - 2, obj.smooth_window_min_size);
-            else % 认为是静止状态，平滑窗口大小线性增加
-%                 if v == 0
-%                     rate = 5;
-%                 else
-%                     rate = ceil(obj.smooth_static_threshold / v);
-%                 end
+            if v <= obj.smooth_static_threshold % 如果速度小于0.5m/s 认为是静止状态，平滑窗口大小增加， 并建立静止中点
                 obj.smooth_window_size = min(obj.smooth_window_size  + 1, obj.smooth_window_max_size);
+            else  % 认为是运动状态，平滑窗口大小线性减小
+                obj.smooth_window_size = max(obj.smooth_window_size - 2, obj.smooth_window_min_size);
             end
-            obj.F_set = [obj.F_set;obj.smooth_window_size];
+            obj.smooth_set = [obj.smooth_set;obj.smooth_window_size];
 %             obj.smooth_window_size = 100;
             smooth_pos_x = mean(obj.smooth_posiRes_set(1, end - obj.smooth_window_size + 1 : end));
             smooth_pos_y = mean(obj.smooth_posiRes_set(2, end - obj.smooth_window_size + 1 : end));
         end
+
+
+        % 对滤波结果通过滑动窗口平滑算法进行处理
+        function [smooth_pos_x, smooth_pos_y] = sliding_window_smooth2(obj, node)
+            % 更新滑动窗口
+            for i = 1 : obj.smooth_window_max_size - 1
+                obj.smooth_posiRes_set(1, i) = obj.smooth_posiRes_set(1, i + 1);
+                obj.smooth_posiRes_set(2, i) = obj.smooth_posiRes_set(2, i + 1);
+                obj.smooth_posiRes_set(3, i) = obj.smooth_posiRes_set(3, i + 1);
+            end
+            obj.smooth_posiRes_set(1, obj.smooth_window_max_size) = node.pos_x;
+            obj.smooth_posiRes_set(2, obj.smooth_window_max_size) = node.pos_y;
+            obj.smooth_posiRes_set(3, obj.smooth_window_max_size) = node.time_stamp;
+            
+
+            vxs = zeros(obj.smooth_velocity_size, 1);
+            vys = zeros(obj.smooth_velocity_size, 1);
+            for i = 1 : obj.smooth_velocity_size 
+                v_x = (obj.smooth_posiRes_set(1, end) - obj.smooth_posiRes_set(1, end - i)) / (obj.smooth_posiRes_set(3, end) - obj.smooth_posiRes_set(3, end - i));
+                v_y = (obj.smooth_posiRes_set(2, end) - obj.smooth_posiRes_set(2, end - i)) / (obj.smooth_posiRes_set(3, end) - obj.smooth_posiRes_set(3, end - i));
+                if isnan(v_x) || isinf(v_x)
+                    vxs(i) = 0;
+                else
+                    vxs(i) = v_x;
+                end
+                if isnan(v_y) || isinf(v_y)
+                    vys(i) = 0;
+                else
+                    vys(i) = v_y;
+                end
+            end
+            v_x = mean(vxs);
+            v_y = mean(vys);
+            v = sqrt(v_x ^ 2 + v_y ^ 2); % 速度因子
+            distance = norm([node.pos_x, node.pos_y] - obj.smooth_static_center); % 距离因子
+            deg = obj.getDeg(obj.smooth_posiRes_set(1:2, end - 2), obj.smooth_posiRes_set(1:2, end - 1), obj.smooth_posiRes_set(1:2, end));
+            % 计算数据处理区间的速度，角度变化
+            obj.smooth_deg_set = [obj.smooth_deg_set; deg];
+            obj.smooth_distance_set = [obj.smooth_distance_set, distance];
+            isLeaving = issorted(obj.smooth_distance_set(end - min(20, length(obj.smooth_distance_set)) + 1:  end));
+            stdDeg = std(obj.smooth_deg_set(end - min(10, length(obj.smooth_deg_set)) + 1 : end));
+            obj.smooth_analysis_set = [obj.smooth_analysis_set; v_x, v_y, v, distance, stdDeg];
+            disp([num2str(v), ' ', num2str(distance), ' ', num2str(deg)]);
+            
+           
+            % 如果速度小于0.5m/s 
+            % 
+            % 认为是静止状态，平滑窗口大小增加， 并建立静止中点
+            if v <= obj.smooth_static_threshold || (obj.smooth_static_step > 20 && distance < 0.5)
+                obj.smooth_window_size = min(obj.smooth_window_size  + 1, obj.smooth_window_max_size);
+                % 处于静止中心的范围内，但是有离开的趋势
+                if isLeaving
+                    obj.smooth_static_center = obj.smooth_static_center * 0.9  + [node.pos_x, node.pos_y] * 0.1;
+                else
+                    obj.smooth_static_center = (obj.smooth_static_center * obj.smooth_static_step  + [node.pos_x, node.pos_y]) /  (obj.smooth_static_step + 1);
+                end
+                obj.smooth_static_step = obj.smooth_static_step + 1;
+                obj.smooth_pre_factor = 0.95;
+                smooth_pos_x = obj.smooth_static_center(1);
+                smooth_pos_y = obj.smooth_static_center(2);
+            else  % 认为是运动状态，平滑窗口大小线性减小
+                obj.smooth_window_size = max(obj.smooth_window_size - 2, obj.smooth_window_min_size);
+                obj.smooth_static_center = obj.smooth_static_center * obj.smooth_pre_factor + [node.pos_x, node.pos_y] * (1 - obj.smooth_pre_factor);
+                obj.smooth_static_step =  0;
+                obj.smooth_pre_factor = max(obj.smooth_pre_factor - 0.01, 0.5);
+%                 smooth_pos_x = mean(obj.smooth_posiRes_set(1, end - obj.smooth_window_size + 1 : end));
+%                 smooth_pos_y = mean(obj.smooth_posiRes_set(2, end - obj.smooth_window_size + 1 : end));
+
+                smooth_pos_x = obj.smooth_static_center(1);
+                smooth_pos_y = obj.smooth_static_center(2);
+            end
+            obj.smooth_set = [obj.smooth_set;obj.smooth_window_size];
+        end
+
+
      
 
         % 更新陈旧观测噪声的置信比例 不断减小陈旧量测噪声的影响
         function updateBet(obj)
             obj.bet = (1 - obj.b) / (1 - obj.b ^ (obj.step + 1));
+        end
+
+        % 计算两个位置之间连线与坐标轴之间的角度
+        function [deg] = getDeg(~, a, b, c)
+            ab = b - a;
+            bc = c - b;
+            if norm(ab) > 1e-6 && norm(bc) > 1e-6
+                cc = acos(dot(ab, bc)/ (norm(ab) * norm(bc)));
+                deg = rad2deg(cc);
+            else
+                deg = 0;
+            end
         end
         
         function XYPositionKalmanFilter(obj, dt, node)
@@ -377,7 +473,7 @@ classdef Kfclass5 < handle
                 dt = 0.005;
             end
             obj.t = (obj.t + dt);                      % update current KF time
-            %KFtime = obj.t;
+            % KFtime = obj.t;
 
             obj.time = obj.time + dt;
             % 存储所有的时间间隔
@@ -395,7 +491,7 @@ classdef Kfclass5 < handle
 
             node.pos_x = obj.X_n1(1);
             node.pos_y = obj.X_n1(3);
-            [smooth_pos_x, smooth_pos_y] = obj.sliding_window_smooth(node);
+            [smooth_pos_x, smooth_pos_y] = obj.sliding_window_smooth2(node);
             kal_res.pos_x_smo = smooth_pos_x;
             kal_res.pos_y_smo = smooth_pos_y;
             obj.step = obj.step + 1;
