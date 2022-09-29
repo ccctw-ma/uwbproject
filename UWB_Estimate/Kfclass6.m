@@ -126,11 +126,11 @@ classdef Kfclass6 < handle
             obj.real_time_data_set = zeros(3, obj.real_time_data_set_size);
             obj.real_time_data_resSet = [];
 
-            obj.velocity_var_set_size = 2;
+            obj.velocity_var_set_size = 10;
             obj.velocity_var_set = zeros(2, obj.velocity_var_set_size);
             obj.velocity_var_set_resSet = [];
 
-            obj.analysis_window_size = 50;
+            obj.analysis_window_size = 40;
             obj.static_step = 0;
             obj.static_vel_threshold = 0.5;
             obj.status = 1; % 0 -> static 1-> moving
@@ -164,11 +164,13 @@ classdef Kfclass6 < handle
             end
             if isnan(node.pos_x)
                 obj.real_time_data_set(1, obj.real_time_data_set_size) = obj.real_time_data_set(1, obj.real_time_data_set_size - 1);
+                node.pos_x = obj.real_time_data_set(1, obj.real_time_data_set_size - 1);
             else
                 obj.real_time_data_set(1, obj.real_time_data_set_size) = node.pos_x;
             end
             if isnan(node.pos_y)
                 obj.real_time_data_set(2, obj.real_time_data_set_size) = obj.real_time_data_set(2, obj.real_time_data_set_size - 1);
+                node.pos_y = obj.real_time_data_set(2, obj.real_time_data_set_size - 1);
             else
                 obj.real_time_data_set(2, obj.real_time_data_set_size) = node.pos_y;
             end
@@ -264,7 +266,8 @@ classdef Kfclass6 < handle
             
 
 
-
+            [posi_x_var, vel_x_var, v_x, posi_y_var, vel_y_var, v_y, v, distance] = obj.realTimeDataAnalysis(node);
+            disp([posi_x_var, vel_x_var, v_x, posi_y_var, vel_y_var, v_y, v, distance]);
             % 观测结果为NaN或者超过设定的界限那么观测结果为无效数据 
             if isnan(Z_n(1)) || isnan(Z_n(2)) || Z_n(1) < 0 || Z_n(2) < 0 
                 isValidMeasurementData = false;
@@ -274,13 +277,13 @@ classdef Kfclass6 < handle
                 X_n1_n1 = X_n1_n;
                 P_n1_n1 = P_n1_n;
                 obj.unValid_mea_arr = [obj.unValid_mea_arr; Z_n(1), Z_n(2)];
-                obj.real_time_data_resSet = [obj.real_time_data_resSet; 0, 0, 0, 0, 0, 0, 0, 0];
+%                 obj.real_time_data_resSet = [obj.real_time_data_resSet; 0, 0, 0, 0, 0, 0, 0, 0];
                 disp('Invalid data');
             % 有效数据， 进行分类分析
             else
                 % 认为处于静止状态
-                [posi_x_var, vel_x_var, v_x, posi_y_var, vel_y_var, v_y, v, distance] = obj.realTimeDataAnalysis(node);
-                disp([posi_x_var, vel_x_var, v_x, posi_y_var, vel_y_var, v_y, v, distance]);
+                % v <= obj.static_vel_threshold * 2 &&
+                
                 if v <= obj.static_vel_threshold || (v <= obj.static_vel_threshold * 2 && obj.static_step >= 20 && distance < 0.5)
                     isStaticMeasurementData = true;
                     if v <= obj.static_vel_threshold
@@ -331,9 +334,11 @@ classdef Kfclass6 < handle
                     obj.innovation_arr = [obj.innovation_arr; innovation'];
     
                
-                    v_x_var = obj.vb * obj.v_x_var_pre + (1 - obj.vb) * vel_x_var;
-                    v_y_var = obj.vb * obj.v_y_var_pre + (1 - obj.vb) * vel_y_var;
-                    if R_diff <= obj.R_upper_bound || obj.static_step > 100
+%                     v_x_var = obj.vb * obj.v_x_var_pre + (1 - obj.vb) * vel_x_var;
+%                     v_y_var = obj.vb * obj.v_y_var_pre + (1 - obj.vb) * vel_y_var;
+                    v_x_var = vel_x_var;
+                    v_y_var = vel_y_var;
+                    if R_diff <= obj.R_upper_bound 
                         R_n = [(obj.MeasNoiseVar + posi_x_var) * max(R_diff, 0.5), 0;
                               0, (obj.MeasNoiseVar + posi_y_var) * max(R_diff, 0.5)];
                     else
@@ -357,9 +362,9 @@ classdef Kfclass6 < handle
                         additional_r = [r_x, 0; 0, r_y];
                         R_n = baseRate * obj.R_base + additional_r;
                     end
-    
-                    obj.v_x_var_pre = v_x_var;
-                    obj.v_y_var_pre = v_y_var;
+%     
+%                     obj.v_x_var_pre = v_x_var;
+%                     obj.v_y_var_pre = v_y_var;
                
                     K_n = P_n1_n * obj.H' / (obj.H * P_n1_n * obj.H' + R_n);
                     obj.K = K_n;

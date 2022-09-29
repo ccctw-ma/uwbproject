@@ -14,7 +14,38 @@ nexttile(1)
 hold on;
 scatter(posiRes(:, 1), posiRes(:, 2), 'blue');
 scatter(kal_posiRes(:, 1), kal_posiRes(:, 2), 'r');
+filePath = "C:\Users\Lenovo\IdeaProjects\uwb_Java\src\data\output.txt";
+fid = fopen(filePath);
+ff = fread(fid);
+ends = find(ff == 10);
+index = 1;
+data = [];
+for i = 1 : length(ends)
+    e = ends(i);
+    ss = ff(index: e - 1);
+    ss = char(ss);
+    data_row = strsplit(ss', ',');
+    data = [data; data_row];
+    index = e + 1;
+end
+
+arr = zeros(size(data));
+for i = 1 : length(data)
+    for j = 1 : 2
+        temp = data(i, j);
+        arr(i, j) = str2double(temp{1, 1});
+    end
+end
+scatter(arr(:,1),arr(:,2));
+
+diff = [];
+for i = 1 : length(data)
+    diff = [diff; norm(kal_posiRes(i, :) - arr(i, :))];
+end
+max(diff)
+mean(diff)
 title('滤波后结果');
+legend('raw', 'kf', 'java')
 hold off;
 
 
@@ -35,6 +66,7 @@ scatter3(posiRes(:,1),posiRes(:,2), 1:length(posiRes), [], linspace(1, 256, leng
 nexttile(4);
 hold on;
 plot(KF.real_time_data_resSet(:, 7));
+plot(KF.real_time_data_resSet(:, 8));
 plot(ones(length(KF.real_time_data_resSet), 1) * 0.5);
 title('速度');
 hold off;
@@ -46,6 +78,7 @@ scatter(KF.outrange_mea_arr(:, 1), KF.outrange_mea_arr(:, 2), 'magenta');
 scatter(KF.unValid_mea_arr(:, 1), KF.unValid_mea_arr(:, 2), 'green');
 legend('static', 'outrange', 'unvalid');
 title('不同情况的数据');
+
 hold off;
 
 
@@ -70,10 +103,13 @@ title('static step');
 return
 %%
 
-figure
-hold on
-plot([1,2, 3])
-plot([4, 5, 6])
-hold off;
-subplot(3, 3, 3)
+% t = [1, 2, 3, 4; 
+%      1, 1, 4, 5;
+%      3, 5, 6, 7;
+%      1, 3, 1, 44];
+% inv(t)
+t = [1, 2, 3, 4, 5;
+     2, 2, 2, 2, 2]
+var(t, 0, 2)
+
 
