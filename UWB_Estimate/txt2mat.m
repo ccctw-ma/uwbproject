@@ -1,4 +1,4 @@
-fid = fopen('../UWB_Data/2022-09-17-11-50-21[标签先举过头顶跑一个来回，后放胸口跑一个来回].txt');
+fid = fopen('2022-10-08-15-12-00.txt');
 ff = fread(fid);
 ends = find(ff == 10);
 index = 1;

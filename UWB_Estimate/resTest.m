@@ -95,3 +95,14 @@ colors = linspace(1, 256, length(posiRes));
 % scatter(kalmanPosiRes(:,1),kalmanPosiRes(:,2), [], colors, 'filled');
 scatter3(posiRes(:,1),posiRes(:,2), 1:length(posiRes), [], colors, 'filled');
 % scatter3(ftm_mean_posiRes(:,1), ftm_mean_posiRes(:,2), 1:length(posiRes), [], colors, 'filled');
+
+%%
+
+
+
+a = gpuArray(zeros(100, 100));
+
+b = a + 1;
+
+
+a(1:100, 20:50)

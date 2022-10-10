@@ -19,7 +19,7 @@ times = [];
 config = initSystemConfig();
 KF = Kfclass6(config);
 
-for index = 1 : length(dataCell)
+for index = 1 : size(dataCell, 1)
 
     data_row = dataCell(index, :);
 

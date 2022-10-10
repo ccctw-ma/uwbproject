@@ -13,9 +13,15 @@ public class WorkerThread implements Runnable {
     private String uwbMessage;
     private List<String> ipList;
 
-    public WorkerThread(String dataInfo) throws IOException {
+    private KalmanFilter kf;
+
+    private String id;
+
+    public WorkerThread(KalmanFilter kf, String dataInfo, String id) throws IOException {
         this.uwbMessage = dataInfo;
         this.ipList = Files.readAllLines(Paths.get("C:\\Program Files\\UWB\\ipConfig.txt"));
+        this.kf = kf;
+        this.id = id;
     }
     @Override
     public void run(){
@@ -27,27 +33,28 @@ public class WorkerThread implements Runnable {
     }
 
     public void processData() throws IOException {
-        double[] data = parseData(uwbMessage);
+        double[] data = parseData(this.uwbMessage);
         DataCell cell = new DataCell(data);
 
-        if (!hasInit) {
+        if (!kf.hasInit) {
             if (Double.isNaN(cell.x) || Double.isNaN(cell.y)) {
                 return;
             }
-            KF.initKf(cell);
-            hasInit = true;
+            kf.initKf(cell);
+            kf.hasInit = true;
             double[] res = new double[]{cell.x, cell.y};
             sendLocInfo(res);
         } else {
-            double[] res = KF.run(cell);
+            double[] res = kf.run(cell);
             sendLocInfo(res);
         }
     }
 
     public void sendLocInfo(double[] res) throws IOException {
         DatagramSocket ds = new DatagramSocket();
-        byte[] bys = Arrays.toString(res).getBytes();
+        byte[] bys = (this.id + "," + res[0] + "," + res[1]).getBytes();
         for(String ip : ipList){
+            ip = ip.trim();
             String[] hostAddress = ip.split(":");
             DatagramPacket dp = new DatagramPacket(bys, bys.length, new InetSocketAddress(hostAddress[0],Integer.parseInt(hostAddress[1])));
             ds.send(dp);

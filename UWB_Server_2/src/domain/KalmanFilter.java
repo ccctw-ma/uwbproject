@@ -11,6 +11,7 @@ import java.util.*;
  */
 public class KalmanFilter {
 
+    public boolean hasInit;
     private double time;
     private Matrix X_n1;
     private Matrix X_n;
@@ -42,6 +43,7 @@ public class KalmanFilter {
 
 
     public KalmanFilter() {
+        this.hasInit = false;
         this.H = new Matrix(new double[][]{
                 {1, 0, 0, 0},
                 {0, 0, 1, 0}

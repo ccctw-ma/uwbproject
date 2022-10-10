@@ -14,34 +14,34 @@ nexttile(1)
 hold on;
 scatter(posiRes(:, 1), posiRes(:, 2), 'blue');
 scatter(kal_posiRes(:, 1), kal_posiRes(:, 2), 'r');
-filePath = "C:\Users\Lenovo\IdeaProjects\uwb_Java\src\data\output.txt";
-fid = fopen(filePath);
-ff = fread(fid);
-ends = find(ff == 10);
-index = 1;
-data = [];
-for i = 1 : length(ends)
-    e = ends(i);
-    ss = ff(index: e - 1);
-    ss = char(ss);
-    data_row = strsplit(ss', ',');
-    data = [data; data_row];
-    index = e + 1;
-end
-
-arr = zeros(size(data));
-for i = 1 : length(data)
-    for j = 1 : 2
-        temp = data(i, j);
-        arr(i, j) = str2double(temp{1, 1});
-    end
-end
-scatter(arr(:,1),arr(:,2));
-
-diff = [];
-for i = 1 : length(data)
-    diff = [diff; norm(kal_posiRes(i, :) - arr(i, :))];
-end
+% filePath = "C:\Users\Lenovo\IdeaProjects\uwb_Java\src\data\output.txt";
+% fid = fopen(filePath);
+% ff = fread(fid);
+% ends = find(ff == 10);
+% index = 1;
+% data = [];
+% for i = 1 : length(ends)
+%     e = ends(i);
+%     ss = ff(index: e - 1);
+%     ss = char(ss);
+%     data_row = strsplit(ss', ',');
+%     data = [data; data_row];
+%     index = e + 1;
+% end
+% 
+% arr = zeros(size(data));
+% for i = 1 : length(data)
+%     for j = 1 : 2
+%         temp = data(i, j);
+%         arr(i, j) = str2double(temp{1, 1});
+%     end
+% end
+% scatter(arr(:,1),arr(:,2));
+% 
+% diff = [];
+% for i = 1 : length(data)
+%     diff = [diff; norm(kal_posiRes(i, :) - arr(i, :))];
+% end
 max(diff)
 mean(diff)
 title('滤波后结果');

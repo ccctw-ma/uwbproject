@@ -1,0 +1,12 @@
+nanoLES,TP,dadba4ef,00,7.84,4.77,0.00,inf,2022-10-08T15:00:30.289,155,0.533431,0ebe0101,1,new-section,-90.75
+nanoLES,TP,dadba4ef,00,8.07,4.76,0.00,inf,2022-10-08T15:00:34.158,156,0.497903,0ebe0101,1,new-section,-86.5
+nanoLES,TP,dadba4ef,00,7.98,4.79,0.00,inf,2022-10-08T15:00:38.321,157,0.446866,0ebe0101,1,new-section,-87.25
+nanoLES,TP,dadba4ef,00,8.19,4.93,0.00,inf,2022-10-08T15:00:42.391,158,0.461903,0ebe0101,1,new-section,-87.3333
+nanoLES,TP,dadba4ef,00,7.97,4.84,0.00,inf,2022-10-08T15:00:46.315,159,0.450299,0ebe0101,1,new-section,-88
+nanoLES,TP,dadba4ef,00,8.19,4.91,0.00,inf,2022-10-08T15:00:50.584,160,0.477156,0ebe0101,1,new-section,-90.1667
+nanoLES,TP,dadba4ef,00,7.76,4.76,0.00,inf,2022-10-08T15:00:54.230,161,0.441941,0ebe0101,1,new-section,-86.9167
+nanoLES,TP,dadba4ef,00,8.24,5.01,0.00,inf,2022-10-08T15:00:57.901,162,0.467813,0ebe0101,1,new-section,-87.4167
+nanoLES,TP,dadba4ef,00,8.31,4.67,0.00,inf,2022-10-08T15:01:01.918,163,0.547447,0ec00101,1,new-section,-92
+nanoLES,TP,dadba4ef,00,8.18,4.91,0.00,inf,2022-10-08T15:01:05.708,164,0.475471,0ec00101,1,new-section,-86.5
+nanoLES,TP,dadba4ef,00,8.27,4.88,0.00,inf,2022-10-08T15:01:09.953,165,0.569129,0ec00101,1,new-section,-92.6667
+nanoLES,TP,dadba4ef,00,nan,nan,nan,inf,2022-10-08T15:01:13.665,166,nan,0ec00101,1,new-section,-114

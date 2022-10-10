@@ -1,9 +1,13 @@
 package domain;
 
+import utils.Utils;
+
 import java.io.*;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -12,9 +16,11 @@ public class TcpServer {
     private static String address = "127.0.0.1";
     private static Socket socket = null;
     private static ExecutorService poolExecutor = null;
-    public static KalmanFilter KF = new KalmanFilter();
-    public static boolean hasInit = false;
+//    public static KalmanFilter KF = new KalmanFilter();
+//    public static boolean hasInit = false;
     public static String infoSavaPath = "C:\\Program Files\\UWB\\infoSaving\\" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+
+    private static final Map<String, KalmanFilter> kfMap = new HashMap<>();
 
     static {
         // 先用单线程线程池
@@ -42,8 +48,11 @@ public class TcpServer {
                     dataInfo = msg.substring(0, msg.lastIndexOf("\r\n"));
                     //将报文写入txt文件: WriteMsgToTxt(infoSavaPath, dataInfo);
                     new Thread(() -> WriteMsgToTxt(infoSavaPath, dataInfo)).start();
+                    // 判断是哪个标签
+                    String id = Utils.getID(dataInfo);
+                    KalmanFilter kf = kfMap.getOrDefault(id, new KalmanFilter());
                     //开始进入计算流程
-                    WorkerThread task = new WorkerThread(dataInfo);
+                    WorkerThread task = new WorkerThread(kf, dataInfo, id);
                     poolExecutor.execute(task);
                 }
             } catch (IOException e) {

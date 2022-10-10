@@ -16,8 +16,14 @@ public class Utils {
         return Files.readAllLines(Paths.get(filename));
     }
 
+    public static String getID(String dataLine) {
+        String[] strings = dataLine.split(",");
+        return strings[2];
+    }
+
     public static double[] parseData(String dataLine) {
         String[] strings = dataLine.split(",");
+        String id = strings[2];
         double x = !strings[4].equals("nan") ? Double.parseDouble(strings[4]) : Double.NaN;
         double y = !strings[5].equals("nan") ? Double.parseDouble(strings[5]) : Double.NaN;
         String time = strings[8];
@@ -27,7 +33,7 @@ public class Utils {
         int second = Integer.parseInt(time.substring(17, 19));
         int millisecond = Integer.parseInt(time.substring(20));
 //        System.out.println(hour + " " + minute + " " + second + " " + millisecond);
-        double timeStamp =  hour * 3600 + minute * 60 + second + millisecond * 1.0 / 1000;
+        double timeStamp = hour * 3600 + minute * 60 + second + millisecond * 1.0 / 1000;
         return new double[]{x, y, timeStamp};
     }
 
