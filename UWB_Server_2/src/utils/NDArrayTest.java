@@ -5,6 +5,8 @@ import Jama.Matrix;
 import domain.DataCell;
 
 import java.util.ArrayDeque;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author msc
@@ -27,10 +29,10 @@ public class NDArrayTest {
 
         Matrix t = new Matrix(new double[][]{{1, 2, 3, 4}, {1, 1, 4, 5}, {3, 5, 6, 7}, {1, 3, 1, 44}});
         t.inverse().print(4, 10);
-        ArrayDeque<Integer> deque = new ArrayDeque<>();
-        deque.add(1);
-        deque.add(2);
-        deque.add(3);
-        System.out.println(deque.pollFirst());
+
+
+        Map<String, Integer> map = new HashMap<>();
+        System.out.println(map.getOrDefault("Hello world", 1));
+        System.out.println(map.containsKey("Hello world"));
     }
 }

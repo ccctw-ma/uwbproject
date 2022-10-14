@@ -50,7 +50,13 @@ public class TcpServer {
                     new Thread(() -> WriteMsgToTxt(infoSavaPath, dataInfo)).start();
                     // 判断是哪个标签
                     String id = Utils.getID(dataInfo);
-                    KalmanFilter kf = kfMap.getOrDefault(id, new KalmanFilter());
+                    KalmanFilter kf;
+                    if(kfMap.containsKey(id)){
+                        kf = kfMap.get(id);
+                    }else {
+                        kf = new KalmanFilter();
+                        kfMap.put(id, kf);
+                    }
                     //开始进入计算流程
                     WorkerThread task = new WorkerThread(kf, dataInfo, id);
                     poolExecutor.execute(task);

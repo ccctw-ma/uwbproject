@@ -42,8 +42,8 @@ scatter(kal_posiRes(:, 1), kal_posiRes(:, 2), 'r');
 % for i = 1 : length(data)
 %     diff = [diff; norm(kal_posiRes(i, :) - arr(i, :))];
 % end
-max(diff)
-mean(diff)
+% max(diff)
+% mean(diff)
 title('滤波后结果');
 legend('raw', 'kf', 'java')
 hold off;
