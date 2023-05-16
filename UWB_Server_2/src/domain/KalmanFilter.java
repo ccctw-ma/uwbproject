@@ -71,7 +71,8 @@ public class KalmanFilter {
     }
 
     /**
-     * 初始化卡尔曼滤波
+     *
+     *
      */
     public void initKf(DataCell cell) {
         this.X_n1 = new Matrix(new double[][]{{cell.x}, {0}, {cell.y}, {0}});
